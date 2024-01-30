@@ -58,6 +58,9 @@ namespace MSC_BasicDemo
         public List<PointF> PointsROI = new List<PointF>();
         int rowNum, colNum, offset, startX, StartY;
         Mat matImg = new Mat();
+        public int maxThreshold = 85;
+        public int minThreshold = 80;
+        public int binary = 100;
 
         struct stResRemoveBlob
         {
@@ -1179,7 +1182,7 @@ namespace MSC_BasicDemo
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Cv2.Threshold(matImg, matImg, thresh: 128, maxval: 256, type: ThresholdTypes.Otsu);
+            Cv2.Threshold(matImg, matImg, thresh: binary, maxval: 256, type: ThresholdTypes.Binary);
             //Cv2.ImShow("binary", matImg);
             pictureBoxCV.Image = matImg.ToBitmap();
         }
@@ -1193,10 +1196,39 @@ namespace MSC_BasicDemo
             Cv2.FindContours(matImg, out contours, out hierarchy, RetrievalModes.Tree, ContourApproximationModes.ApproxSimple);
             Mat result = new Mat(matImg.Size(), MatType.CV_8UC1, Scalar.Black);
 
-            for (int i = 0; i < contours.Length; i++)
+            List<OpenCvSharp.Point[]> contoursToKeep = new List<OpenCvSharp.Point[]>();
+
+            foreach(var Contour in contours)
             {
-                Cv2.DrawContours(result, contours, i, Scalar.White, thickness: 5);
+                OpenCvSharp.Rect boundingRect = Cv2.BoundingRect(Contour);
+                if (boundingRect.Width >= minThreshold && boundingRect.Width <= maxThreshold && boundingRect.Height >= minThreshold && boundingRect.Height <= maxThreshold)
+                {
+                    contoursToKeep.Add(Contour);
+                }
             }
+
+            for (int i = 0; i < contoursToKeep.Count; i++)
+            {
+                Cv2.DrawContours(result, contoursToKeep, i, Scalar.White, thickness: 6);
+            }
+
+            //foreach (var contour in contoursToKeep)
+            //{
+            //    RotatedRect rotatedRect = Cv2.MinAreaRect(contour);
+            //    Point2f[] vertices = Cv2.BoxPoints(rotatedRect);
+
+            //    OpenCvSharp.Point[] boxVertices = new OpenCvSharp.Point[4];
+            //    for (int i = 0; i < 4; i++)
+            //    {
+            //        boxVertices[i] = new OpenCvSharp.Point((int)vertices[i].X, (int)vertices[i].Y);
+            //    }
+
+            //    result.Polylines(new[] {boxVertices}, true, Scalar.White, 5);
+            //}
+            //for (int i = 0; i < contours.Length; i++)
+            //{
+            //    Cv2.DrawContours(result, contours, i, Scalar.White, thickness: 5);
+            //}
             //Cv2.ImShow("Blobs Detection Result", matImg);
             pictureBoxCV.Image = result.ToBitmap();
         }
@@ -1208,9 +1240,55 @@ namespace MSC_BasicDemo
 
         private void buttonMono_Click(object sender, EventArgs e)
         {
-            matImg = Mophology(5, 5, MorphTypes.Dilate, matImg);
+            matImg = Mophology(9, 1, MorphTypes.Dilate, matImg);
             //Cv2.ImShow("mono",matImg);
             pictureBoxCV.Image = matImg.ToBitmap();
+        }
+
+        private void numericUpDownThresholdMin_ValueChanged(object sender, EventArgs e)
+        {
+            minThreshold = (int)numericUpDownThresholdMin.Value;
+        }
+
+        private void numericUpDownBinary_ValueChanged(object sender, EventArgs e)
+        {
+            binary = (int)numericUpDownBinary.Value;
+        }
+
+        private void buttonNewContour_Click(object sender, EventArgs e)
+        {
+            parameter_remove_clean parameter_Remove_Clean = new parameter_remove_clean();
+            parameter_Remove_Clean.iHeightMax = 5;
+            parameter_Remove_Clean.iWidthMax = 5;
+            RemoveBlobs(parameter_Remove_Clean, matImg, false);
+        }
+
+        private void numericUpDownThreshold_ValueChanged(object sender, EventArgs e)
+        {
+            maxThreshold = (int)numericUpDownThresholdMax.Value;
+        }
+
+        private void buttonRoi_Click(object sender, EventArgs e)
+        {
+            //foreach (var contour in contoursToKeep)
+            //{
+            //    RotatedRect rotatedRect = Cv2.MinAreaRect(contour);
+            //    Point2f[] vertices = Cv2.BoxPoints(rotatedRect);
+
+            //    OpenCvSharp.Point[] boxVertices = new OpenCvSharp.Point[4];
+            //    for (int i = 0; i < 4; i++)
+            //    {
+            //        boxVertices[i] = new OpenCvSharp.Point((int)vertices[i].X, (int)vertices[i].Y);
+            //    }
+
+            //    result.Polylines(new[] { boxVertices }, true, Scalar.White, 5);
+            //}
+            //for (int i = 0; i < contours.Length; i++)
+            //{
+            //    Cv2.DrawContours(result, contours, i, Scalar.White, thickness: 5);
+            //}
+            //Cv2.ImShow("Blobs Detection Result", matImg);
+
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)

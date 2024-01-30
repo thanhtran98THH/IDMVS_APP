@@ -64,14 +64,22 @@
             this.label7 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.pictureBoxCV = new System.Windows.Forms.PictureBox();
-            this.button1 = new System.Windows.Forms.Button();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.button2 = new System.Windows.Forms.Button();
-            this.findContour = new System.Windows.Forms.Button();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.numericUpDownBinary = new System.Windows.Forms.NumericUpDown();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.numericUpDownThresholdMin = new System.Windows.Forms.NumericUpDown();
+            this.numericUpDownThresholdMax = new System.Windows.Forms.NumericUpDown();
+            this.buttonNewContour = new System.Windows.Forms.Button();
             this.buttonMono = new System.Windows.Forms.Button();
+            this.findContour = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.pictureBoxCV = new System.Windows.Forms.PictureBox();
+            this.buttonRoi = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -84,13 +92,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownStartY)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
-            this.tabPage2.SuspendLayout();
-            this.groupBox3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCV)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownBinary)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThresholdMin)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThresholdMax)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCV)).BeginInit();
             this.SuspendLayout();
             // 
             // cbDeviceList
@@ -483,55 +494,6 @@
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.buttonMono);
-            this.tabPage2.Controls.Add(this.findContour);
-            this.tabPage2.Controls.Add(this.button2);
-            this.tabPage2.Controls.Add(this.button1);
-            this.tabPage2.Controls.Add(this.pictureBoxCV);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1495, 751);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.label4);
-            this.groupBox3.Controls.Add(this.numericUpDownH);
-            this.groupBox3.Controls.Add(this.numericUpDownR);
-            this.groupBox3.Controls.Add(this.row);
-            this.groupBox3.Controls.Add(this.numericUpDown1);
-            this.groupBox3.Controls.Add(this.label5);
-            this.groupBox3.Location = new System.Drawing.Point(267, 534);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(229, 161);
-            this.groupBox3.TabIndex = 19;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "groupBox3";
-            // 
-            // pictureBoxCV
-            // 
-            this.pictureBoxCV.BackColor = System.Drawing.Color.DarkGray;
-            this.pictureBoxCV.Location = new System.Drawing.Point(6, 6);
-            this.pictureBoxCV.Name = "pictureBoxCV";
-            this.pictureBoxCV.Size = new System.Drawing.Size(1309, 737);
-            this.pictureBoxCV.TabIndex = 0;
-            this.pictureBoxCV.TabStop = false;
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(1343, 38);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "convert";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -555,15 +517,140 @@
             this.splitContainer1.SplitterDistance = 964;
             this.splitContainer1.TabIndex = 21;
             // 
-            // button2
+            // groupBox3
             // 
-            this.button2.Location = new System.Drawing.Point(1343, 67);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 2;
-            this.button2.Text = "binary";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.groupBox3.Controls.Add(this.label4);
+            this.groupBox3.Controls.Add(this.numericUpDownH);
+            this.groupBox3.Controls.Add(this.numericUpDownR);
+            this.groupBox3.Controls.Add(this.row);
+            this.groupBox3.Controls.Add(this.numericUpDown1);
+            this.groupBox3.Controls.Add(this.label5);
+            this.groupBox3.Location = new System.Drawing.Point(267, 534);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(229, 161);
+            this.groupBox3.TabIndex = 19;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "groupBox3";
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.buttonRoi);
+            this.tabPage2.Controls.Add(this.numericUpDownBinary);
+            this.tabPage2.Controls.Add(this.label10);
+            this.tabPage2.Controls.Add(this.label9);
+            this.tabPage2.Controls.Add(this.label8);
+            this.tabPage2.Controls.Add(this.numericUpDownThresholdMin);
+            this.tabPage2.Controls.Add(this.numericUpDownThresholdMax);
+            this.tabPage2.Controls.Add(this.buttonNewContour);
+            this.tabPage2.Controls.Add(this.buttonMono);
+            this.tabPage2.Controls.Add(this.findContour);
+            this.tabPage2.Controls.Add(this.button2);
+            this.tabPage2.Controls.Add(this.button1);
+            this.tabPage2.Controls.Add(this.pictureBoxCV);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(1495, 751);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // numericUpDownBinary
+            // 
+            this.numericUpDownBinary.Location = new System.Drawing.Point(1357, 296);
+            this.numericUpDownBinary.Name = "numericUpDownBinary";
+            this.numericUpDownBinary.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDownBinary.TabIndex = 9;
+            this.numericUpDownBinary.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.numericUpDownBinary.ValueChanged += new System.EventHandler(this.numericUpDownBinary_ValueChanged);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(1321, 298);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(36, 13);
+            this.label10.TabIndex = 8;
+            this.label10.Text = "Binary";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(1324, 272);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(27, 13);
+            this.label9.TabIndex = 7;
+            this.label9.Text = "MIN";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(1321, 246);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(30, 13);
+            this.label8.TabIndex = 7;
+            this.label8.Text = "MAX";
+            // 
+            // numericUpDownThresholdMin
+            // 
+            this.numericUpDownThresholdMin.Location = new System.Drawing.Point(1357, 270);
+            this.numericUpDownThresholdMin.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.numericUpDownThresholdMin.Name = "numericUpDownThresholdMin";
+            this.numericUpDownThresholdMin.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDownThresholdMin.TabIndex = 6;
+            this.numericUpDownThresholdMin.Value = new decimal(new int[] {
+            80,
+            0,
+            0,
+            0});
+            this.numericUpDownThresholdMin.ValueChanged += new System.EventHandler(this.numericUpDownThresholdMin_ValueChanged);
+            // 
+            // numericUpDownThresholdMax
+            // 
+            this.numericUpDownThresholdMax.Location = new System.Drawing.Point(1357, 244);
+            this.numericUpDownThresholdMax.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.numericUpDownThresholdMax.Name = "numericUpDownThresholdMax";
+            this.numericUpDownThresholdMax.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDownThresholdMax.TabIndex = 6;
+            this.numericUpDownThresholdMax.Value = new decimal(new int[] {
+            85,
+            0,
+            0,
+            0});
+            this.numericUpDownThresholdMax.ValueChanged += new System.EventHandler(this.numericUpDownThreshold_ValueChanged);
+            // 
+            // buttonNewContour
+            // 
+            this.buttonNewContour.Enabled = false;
+            this.buttonNewContour.Location = new System.Drawing.Point(1343, 154);
+            this.buttonNewContour.Name = "buttonNewContour";
+            this.buttonNewContour.Size = new System.Drawing.Size(75, 23);
+            this.buttonNewContour.TabIndex = 5;
+            this.buttonNewContour.Text = "new contour";
+            this.buttonNewContour.UseVisualStyleBackColor = true;
+            this.buttonNewContour.Click += new System.EventHandler(this.buttonNewContour_Click);
+            // 
+            // buttonMono
+            // 
+            this.buttonMono.Location = new System.Drawing.Point(1343, 125);
+            this.buttonMono.Name = "buttonMono";
+            this.buttonMono.Size = new System.Drawing.Size(75, 23);
+            this.buttonMono.TabIndex = 4;
+            this.buttonMono.Text = "Mono";
+            this.buttonMono.UseVisualStyleBackColor = true;
+            this.buttonMono.Click += new System.EventHandler(this.buttonMono_Click);
             // 
             // findContour
             // 
@@ -575,15 +662,44 @@
             this.findContour.UseVisualStyleBackColor = true;
             this.findContour.Click += new System.EventHandler(this.findContour_Click);
             // 
-            // buttonMono
+            // button2
             // 
-            this.buttonMono.Location = new System.Drawing.Point(1343, 125);
-            this.buttonMono.Name = "buttonMono";
-            this.buttonMono.Size = new System.Drawing.Size(75, 23);
-            this.buttonMono.TabIndex = 4;
-            this.buttonMono.Text = "Mono";
-            this.buttonMono.UseVisualStyleBackColor = true;
-            this.buttonMono.Click += new System.EventHandler(this.buttonMono_Click);
+            this.button2.Location = new System.Drawing.Point(1343, 67);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 2;
+            this.button2.Text = "binary";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(1343, 38);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "convert";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // pictureBoxCV
+            // 
+            this.pictureBoxCV.BackColor = System.Drawing.Color.DarkGray;
+            this.pictureBoxCV.Location = new System.Drawing.Point(6, 6);
+            this.pictureBoxCV.Name = "pictureBoxCV";
+            this.pictureBoxCV.Size = new System.Drawing.Size(1309, 737);
+            this.pictureBoxCV.TabIndex = 0;
+            this.pictureBoxCV.TabStop = false;
+            // 
+            // buttonRoi
+            // 
+            this.buttonRoi.Location = new System.Drawing.Point(1343, 183);
+            this.buttonRoi.Name = "buttonRoi";
+            this.buttonRoi.Size = new System.Drawing.Size(75, 23);
+            this.buttonRoi.TabIndex = 10;
+            this.buttonRoi.Text = "Roi";
+            this.buttonRoi.UseVisualStyleBackColor = true;
+            this.buttonRoi.Click += new System.EventHandler(this.buttonRoi_Click);
             // 
             // Form1
             // 
@@ -613,14 +729,18 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownStartY)).EndInit();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
-            this.tabPage2.ResumeLayout(false);
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCV)).EndInit();
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownBinary)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThresholdMin)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThresholdMax)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCV)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -672,6 +792,14 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button findContour;
         private System.Windows.Forms.Button buttonMono;
+        private System.Windows.Forms.Button buttonNewContour;
+        private System.Windows.Forms.NumericUpDown numericUpDownThresholdMax;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.NumericUpDown numericUpDownThresholdMin;
+        private System.Windows.Forms.NumericUpDown numericUpDownBinary;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Button buttonRoi;
     }
 }
 
