@@ -94,9 +94,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MvCodeReaderSDK.Net, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MvCodeReaderSDK.Net, Version=1.5.3.2, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\AnyCpu\MvCodeReaderSDK.Net.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\IDMVS\Development\Modules\MvCodeReaderSDK\DotNet\AnyCpu\MvCodeReaderSDK.Net.dll</HintPath>
     </Reference>
     <Reference Include="OpenCvSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenCvSharp4.4.9.0.20240103\lib\net48\OpenCvSharp.dll</HintPath>

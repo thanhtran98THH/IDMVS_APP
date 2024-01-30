@@ -67,6 +67,7 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.buttonRoi = new System.Windows.Forms.Button();
             this.numericUpDownBinary = new System.Windows.Forms.NumericUpDown();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
@@ -79,7 +80,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.pictureBoxCV = new System.Windows.Forms.PictureBox();
-            this.buttonRoi = new System.Windows.Forms.Button();
+            this.buttonLoad = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -534,6 +535,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.buttonLoad);
             this.tabPage2.Controls.Add(this.buttonRoi);
             this.tabPage2.Controls.Add(this.numericUpDownBinary);
             this.tabPage2.Controls.Add(this.label10);
@@ -554,6 +556,16 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // buttonRoi
+            // 
+            this.buttonRoi.Location = new System.Drawing.Point(1343, 183);
+            this.buttonRoi.Name = "buttonRoi";
+            this.buttonRoi.Size = new System.Drawing.Size(75, 23);
+            this.buttonRoi.TabIndex = 10;
+            this.buttonRoi.Text = "Roi";
+            this.buttonRoi.UseVisualStyleBackColor = true;
+            this.buttonRoi.Click += new System.EventHandler(this.buttonRoi_Click);
             // 
             // numericUpDownBinary
             // 
@@ -691,15 +703,15 @@
             this.pictureBoxCV.TabIndex = 0;
             this.pictureBoxCV.TabStop = false;
             // 
-            // buttonRoi
+            // buttonLoad
             // 
-            this.buttonRoi.Location = new System.Drawing.Point(1343, 183);
-            this.buttonRoi.Name = "buttonRoi";
-            this.buttonRoi.Size = new System.Drawing.Size(75, 23);
-            this.buttonRoi.TabIndex = 10;
-            this.buttonRoi.Text = "Roi";
-            this.buttonRoi.UseVisualStyleBackColor = true;
-            this.buttonRoi.Click += new System.EventHandler(this.buttonRoi_Click);
+            this.buttonLoad.Location = new System.Drawing.Point(1357, 679);
+            this.buttonLoad.Name = "buttonLoad";
+            this.buttonLoad.Size = new System.Drawing.Size(90, 41);
+            this.buttonLoad.TabIndex = 11;
+            this.buttonLoad.Text = "Load";
+            this.buttonLoad.UseVisualStyleBackColor = true;
+            this.buttonLoad.Click += new System.EventHandler(this.buttonLoad_Click);
             // 
             // Form1
             // 
@@ -800,6 +812,7 @@
         private System.Windows.Forms.NumericUpDown numericUpDownBinary;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Button buttonRoi;
+        private System.Windows.Forms.Button buttonLoad;
     }
 }
 

@@ -61,6 +61,24 @@ namespace MSC_BasicDemo
         public int maxThreshold = 85;
         public int minThreshold = 80;
         public int binary = 100;
+        public List<code_data> IDMV_Data = new List<code_data>();
+        List<OpenCvSharp.Point[]> contoursToKeep = new List<OpenCvSharp.Point[]>();
+
+        public class code_data
+        {
+            string Decoded_string { get; set; }
+            System.Drawing.Point[] Code_coner {  get; set; }
+            bool IsSorted {  get; set; }
+            int iCenterP { get; set; }
+
+            public code_data(string decoded_string, System.Drawing.Point[] code_coner, bool isSorted, int iCenter)
+            {
+                Decoded_string = decoded_string;
+                Code_coner = code_coner;
+                IsSorted = isSorted;
+                iCenterP = iCenter;
+            }
+        }
 
         struct stResRemoveBlob
         {
@@ -200,7 +218,7 @@ namespace MSC_BasicDemo
             
             //pictureBox2.Show();
             //graBox2 = pictureBox2.CreateGraphics();
-            
+
         }
 
         // ch:显示错误信息 | en:Show error message
@@ -604,10 +622,10 @@ namespace MSC_BasicDemo
                     }
 
                     MvCodeReader.MV_CODEREADER_STRINGVALUE stBcrResult2 = (MvCodeReader.MV_CODEREADER_STRINGVALUE)Marshal.PtrToStructure(stFrameChannel0Info.pstCodeListEx, typeof(MvCodeReader.MV_CODEREADER_STRINGVALUE));
-                    if(stBcrResult2.chCurValue.Length != 0)
-                    {
-                        Console.WriteLine("============================data = " + stBcrResult2.chCurValue);
-                    }
+                    //if(stBcrResult2.chCurValue.Length != 0)
+                    //{
+                    //    Console.WriteLine("============================data = " + stBcrResult2.chCurValue);
+                    //}
 
                     MvCodeReader.MV_CODEREADER_RESULT_BCR_EX stBcrResult = (MvCodeReader.MV_CODEREADER_RESULT_BCR_EX)Marshal.PtrToStructure(stFrameChannel0Info.pstCodeListEx, typeof(MvCodeReader.MV_CODEREADER_RESULT_BCR_EX));
 
@@ -620,14 +638,16 @@ namespace MSC_BasicDemo
                             listBox1.Items.Clear();
                         }
                         pictureBox1.Refresh();
+                        IDMV_Data.Clear();
                         //graBox1.DrawLine(penChannelLine, new PointF(10f, 10f), new PointF(10f, 1000f));
-                        if (rowNum != 0 && colNum != 0 && offset != 0)
-                        {
-                            for(int i = 0; i < colNum; i++)
-                            {
-                                graBox1.DrawLine(penChannelLine, new PointF(startX+i*offset, 0), new PointF(startX + i * offset, 1000f));
-                            }
-                        }
+                        //if (rowNum != 0 && colNum != 0 && offset != 0)
+                        //{
+                        //    for(int i = 0; i < colNum; i++)
+                        //    {
+                        //        graBox1.DrawLine(penChannelLine, new PointF(startX+i*offset, 0), new PointF(startX + i * offset, 1000f));
+                        //    }
+                        //}
+                        string data = "";
                         for (int i = 0; i < stBcrResult.nCodeNum; ++i)
                         {
                             // test decode data
@@ -636,12 +656,13 @@ namespace MSC_BasicDemo
                             {
                                 string strCode = Encoding.UTF8.GetString(stBcrResult.stBcrInfoEx[i].chCode);
                                 Console.WriteLine("------------------------------------------------Get CodeNum: " + "CodeNum[" + i.ToString() + "], CodeString[" + strCode.Trim().TrimEnd('\0') + "]");
+
                             }
                             else
                             {
                                 string strCode = Encoding.GetEncoding("GB2312").GetString(stBcrResult.stBcrInfoEx[i].chCode);
                                 Console.WriteLine("------------------------------------------------Get CodeNum: " + "CodeNum[" + i.ToString() + "], CodeString[" + strCode.Trim().TrimEnd('\0') + "]");
-                                string data = strCode.Trim().TrimEnd('\0');
+                                data = strCode.Trim().TrimEnd('\0');
                                 decodeList.Add(data); 
                                 listBox1.Items.Add(data);
                             }
@@ -651,9 +672,10 @@ namespace MSC_BasicDemo
                             {
                                 stPointChannel0List[j].X = (int)(stBcrResult.stBcrInfoEx[i].pt[j].x * (float)(pictureBox1.Size.Width) / stFrameChannel0Info.nWidth);
                                 stPointChannel0List[j].Y = (int)(stBcrResult.stBcrInfoEx[i].pt[j].y * (float)(pictureBox1.Size.Height) / stFrameChannel0Info.nHeight);
-                                PointsROI.Add(ConvertPointToPointF(stPointChannel0List[j]));
+                                //PointsROI.Add(ConvertPointToPointF(stPointChannel0List[j]));
                             }
-
+                            code_data code = new code_data(data, stPointChannel0List, false, 0);
+                            IDMV_Data.Add(code);
                             graBox1.DrawPolygon(penChannel0, stPointChannel0List);
 
                             // test draw roi
@@ -1172,8 +1194,17 @@ namespace MSC_BasicDemo
 
         private void button1_Click(object sender, EventArgs e)
         {
-            pictureBoxCV.Image = pictureBox1.Image;
-            Bitmap bitmap = (Bitmap)pictureBox1.Image;
+            Bitmap bitmap = null;
+            if (pictureBox1.Image != null)
+            {
+                pictureBoxCV.Image = pictureBox1.Image;
+                bitmap = (Bitmap)pictureBox1.Image;
+
+            }
+            else
+            {
+                bitmap = (Bitmap)pictureBoxCV.Image;
+            }
             matImg = new Mat(5440, 3648, MatType.CV_8UC1);
             matImg = BitmapConverter.ToMat(bitmap);
             Cv2.CvtColor(matImg, matImg, ColorConversionCodes.BGRA2GRAY);
@@ -1196,7 +1227,7 @@ namespace MSC_BasicDemo
             Cv2.FindContours(matImg, out contours, out hierarchy, RetrievalModes.Tree, ContourApproximationModes.ApproxSimple);
             Mat result = new Mat(matImg.Size(), MatType.CV_8UC1, Scalar.Black);
 
-            List<OpenCvSharp.Point[]> contoursToKeep = new List<OpenCvSharp.Point[]>();
+           
 
             foreach(var Contour in contours)
             {
@@ -1212,6 +1243,11 @@ namespace MSC_BasicDemo
                 Cv2.DrawContours(result, contoursToKeep, i, Scalar.White, thickness: 6);
             }
 
+            //Point2f point = new Point2f();
+            //InputArray inputArray = contoursToKeep.ToArray();
+            ////Cv2.DrawContours
+            //InputArray inputArray = InputArray.Create(contoursToKeep[0]);
+            //isInside(point, inputArray);
             //foreach (var contour in contoursToKeep)
             //{
             //    RotatedRect rotatedRect = Cv2.MinAreaRect(contour);
@@ -1291,6 +1327,12 @@ namespace MSC_BasicDemo
 
         }
 
+        private void buttonLoad_Click(object sender, EventArgs e)
+        {
+            matImg = Cv2.ImRead("C:\\Users\\Doctor\\Desktop\\idmv\\Image_20240130174739094.jpg", ImreadModes.Color);
+            pictureBoxCV.Image = matImg.ToBitmap() ;
+        }
+
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
             offset = (int)numericUpDown1.Value;
@@ -1335,7 +1377,35 @@ namespace MSC_BasicDemo
             }
         }
 
+        public static System.Drawing.Point FindCenterPoint(System.Drawing.Point[] points)
+        {
+            if(points.Length != 4)
+            {
+                throw new ArgumentException("Point count error");
+            }
+            //System.Drawing.Rectangle rec = new Rectangle();
+            int sumX = 0;   
+            int sumY = 0;
+            foreach(var point in points) 
+            {
+                sumX += point.X;
+                sumY += point.Y;
+            }
+            int centerX = sumX / 4;
+            int centerY = sumY / 4;
+            return new System.Drawing.Point(centerX, centerY);
+        }
 
+        public bool isInside(Point2f point, InputArray contours)
+        {
+            double distance =  Cv2.PointPolygonTest(contours, point, true);
+            if(distance >= 0)
+            {
+                return true;
+            }
+            else
+                return false;
+        }
 
     }
 }
