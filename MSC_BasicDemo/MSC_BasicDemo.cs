@@ -19,6 +19,7 @@ using System.Windows;
 using System.Security.Cryptography.X509Certificates;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
+using System.Reflection;
 
 
 namespace MSC_BasicDemo
@@ -64,13 +65,13 @@ namespace MSC_BasicDemo
         public int binary = 100;
         public List<code_data> IDMV_Data = new List<code_data>();
         List<OpenCvSharp.Point[]> contoursToKeep = new List<OpenCvSharp.Point[]>();
-        List<Point2f[]> pCodeConer = new List< Point2f[]>();
+        List<Point2f[]> pCodeConer = new List<Point2f[]>();
 
         public class code_data
         {
             public string Decoded_string { get; set; }
-            public Point2f[] Code_coner {  get; set; }
-            public bool IsSorted {  get; set; }
+            public Point2f[] Code_coner { get; set; }
+            public bool IsSorted { get; set; }
             public int iCenterP { get; set; }
 
             public code_data(string decoded_string, Point2f[] code_coner, bool isSorted, int iCenter)
@@ -129,7 +130,7 @@ namespace MSC_BasicDemo
         static stResRemoveBlob RemoveBlobs(parameter_remove_clean para, Mat mInGray, bool bDebug)
         {
             stResRemoveBlob stRes = new stResRemoveBlob();
-            
+
             try
             {
                 if (mInGray.Channels() == 3) return stRes;
@@ -238,7 +239,7 @@ namespace MSC_BasicDemo
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxCV.SizeMode = PictureBoxSizeMode.StretchImage;
             graBox1 = pictureBox1.CreateGraphics();
-            
+
             //pictureBox2.Show();
             //graBox2 = pictureBox2.CreateGraphics();
 
@@ -294,7 +295,7 @@ namespace MSC_BasicDemo
             int nRet = MvCodeReader.MV_CODEREADER_EnumDevices_NET(ref m_pstDeviceList, MvCodeReader.MV_CODEREADER_GIGE_DEVICE);
             if (0 != nRet)
             {
-                ShowErrorMsg("Enumerate devices fail!",nRet);
+                ShowErrorMsg("Enumerate devices fail!", nRet);
                 return;
             }
 
@@ -597,13 +598,13 @@ namespace MSC_BasicDemo
         public void RecvChannel0Thread()
         {
             int nRet = MvCodeReader.MV_CODEREADER_OK;
-            
+
 
             IntPtr pData = IntPtr.Zero;
             MvCodeReader.MV_CODEREADER_IMAGE_OUT_INFO_EX2 stFrameChannel0Info = new MvCodeReader.MV_CODEREADER_IMAGE_OUT_INFO_EX2();
             IntPtr pstChannel0InfoEx2 = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MvCodeReader.MV_CODEREADER_IMAGE_OUT_INFO_EX2)));
             Marshal.StructureToPtr(stFrameChannel0Info, pstChannel0InfoEx2, false);
-            
+
             while (m_bGrabbing)
             {
                 nRet = m_MyCamera.MV_CODEREADER_MSC_GetOneFrameTimeout_NET(ref pData, pstChannel0InfoEx2, 0, 1000);
@@ -663,7 +664,7 @@ namespace MSC_BasicDemo
                         pCodeConer.Clear();
                         pictureBox1.Refresh();
                         IDMV_Data.Clear();
-                        
+
                         string data = "";
                         for (int i = 0; i < stBcrResult.nCodeNum; ++i)
                         {
@@ -740,7 +741,7 @@ namespace MSC_BasicDemo
 
                         dataGridViewShowData.Rows.Clear();
                         int iNo = 1;
-                        foreach(var codeData in IDMV_Data)
+                        foreach (var codeData in IDMV_Data)
                         {
                             dataGridViewShowData.BeginInvoke(new Action(() =>
                             {
@@ -756,7 +757,7 @@ namespace MSC_BasicDemo
                         fillerImg();
                         contourFind();
                         drawRoi();
-                        
+
                     }
 
 
@@ -1015,7 +1016,7 @@ namespace MSC_BasicDemo
             int nRet = m_MyCamera.MV_CODEREADER_StopGrabbing_NET();
             if (nRet != MvCodeReader.MV_CODEREADER_OK)
             {
-                ShowErrorMsg("Stop Grabbing Fail!" , nRet);
+                ShowErrorMsg("Stop Grabbing Fail!", nRet);
             }
 
             // ch:控件操作 | en:Control Operation
@@ -1375,7 +1376,7 @@ namespace MSC_BasicDemo
 
         public void isCenter()
         {
-            
+
         }
 
         private void numericUpDownH_ValueChanged(object sender, EventArgs e)
@@ -1439,7 +1440,7 @@ namespace MSC_BasicDemo
         private void buttonLoad_Click(object sender, EventArgs e)
         {
             matImg = Cv2.ImRead("C:\\Users\\Doctor\\Desktop\\idmv\\Image_20240130174739094.jpg", ImreadModes.Color);
-            pictureBoxCV.Image = matImg.ToBitmap() ;
+            pictureBoxCV.Image = matImg.ToBitmap();
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
@@ -1548,7 +1549,7 @@ namespace MSC_BasicDemo
 
         private void buttonDrawConer_Click(object sender, EventArgs e)
         {
-            
+
             //foreach(var point in pCodeConer)
             //{
             //    OpenCvSharp.Point[] boxVertices = new OpenCvSharp.Point[4];
@@ -1608,29 +1609,29 @@ namespace MSC_BasicDemo
             }
         }
 
-        public static System.Drawing.Point FindCenterPoint(System.Drawing.Point[] points)
+        public static Point2f FindCenterPoint(Point2f[] points)
         {
-            if(points.Length != 4)
+            if (points.Length != 4)
             {
                 throw new ArgumentException("Point count error");
             }
             //System.Drawing.Rectangle rec = new Rectangle();
-            int sumX = 0;   
-            int sumY = 0;
-            foreach(var point in points) 
+            float sumX = 0;
+            float sumY = 0;
+            foreach (var point in points)
             {
                 sumX += point.X;
                 sumY += point.Y;
             }
-            int centerX = sumX / 4;
-            int centerY = sumY / 4;
-            return new System.Drawing.Point(centerX, centerY);
+            float centerX = sumX / 4;
+            float centerY = sumY / 4;
+            return new Point2f(centerX, centerY);
         }
 
         public bool isInside(Point2f point, InputArray contours)
         {
-            double distance =  Cv2.PointPolygonTest(contours, point, true);
-            if(distance >= 0)
+            double distance = Cv2.PointPolygonTest(contours, point, false);
+            if (distance >= 0)
             {
                 return true;
             }
