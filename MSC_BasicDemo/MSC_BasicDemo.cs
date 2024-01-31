@@ -20,6 +20,7 @@ using System.Security.Cryptography.X509Certificates;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 
+
 namespace MSC_BasicDemo
 {
     public partial class Form1 : Form
@@ -58,25 +59,46 @@ namespace MSC_BasicDemo
         public List<PointF> PointsROI = new List<PointF>();
         int rowNum, colNum, offset, startX, StartY;
         Mat matImg = new Mat();
-        public int maxThreshold = 85;
-        public int minThreshold = 80;
+        public int maxThreshold = 150;
+        public int minThreshold = 100;
         public int binary = 100;
         public List<code_data> IDMV_Data = new List<code_data>();
         List<OpenCvSharp.Point[]> contoursToKeep = new List<OpenCvSharp.Point[]>();
+        List<Point2f[]> pCodeConer = new List< Point2f[]>();
 
         public class code_data
         {
-            string Decoded_string { get; set; }
-            System.Drawing.Point[] Code_coner {  get; set; }
-            bool IsSorted {  get; set; }
-            int iCenterP { get; set; }
+            public string Decoded_string { get; set; }
+            public Point2f[] Code_coner {  get; set; }
+            public bool IsSorted {  get; set; }
+            public int iCenterP { get; set; }
 
-            public code_data(string decoded_string, System.Drawing.Point[] code_coner, bool isSorted, int iCenter)
+            public code_data(string decoded_string, Point2f[] code_coner, bool isSorted, int iCenter)
             {
                 Decoded_string = decoded_string;
                 Code_coner = code_coner;
                 IsSorted = isSorted;
                 iCenterP = iCenter;
+            }
+
+            public string getDecode()
+            {
+                return Decoded_string;
+            }
+
+            public Point2f[] getPoint()
+            {
+                return Code_coner;
+            }
+
+            public bool getSorted()
+            {
+                return IsSorted;
+            }
+
+            public int getCenter()
+            {
+                return iCenterP;
             }
         }
 
@@ -206,6 +228,7 @@ namespace MSC_BasicDemo
 
             return stRes;
         }
+
         public Form1()
         {
             InitializeComponent();
@@ -580,7 +603,7 @@ namespace MSC_BasicDemo
             MvCodeReader.MV_CODEREADER_IMAGE_OUT_INFO_EX2 stFrameChannel0Info = new MvCodeReader.MV_CODEREADER_IMAGE_OUT_INFO_EX2();
             IntPtr pstChannel0InfoEx2 = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MvCodeReader.MV_CODEREADER_IMAGE_OUT_INFO_EX2)));
             Marshal.StructureToPtr(stFrameChannel0Info, pstChannel0InfoEx2, false);
-
+            
             while (m_bGrabbing)
             {
                 nRet = m_MyCamera.MV_CODEREADER_MSC_GetOneFrameTimeout_NET(ref pData, pstChannel0InfoEx2, 0, 1000);
@@ -637,16 +660,10 @@ namespace MSC_BasicDemo
                             Console.WriteLine("Clear list code");
                             listBox1.Items.Clear();
                         }
+                        pCodeConer.Clear();
                         pictureBox1.Refresh();
                         IDMV_Data.Clear();
-                        //graBox1.DrawLine(penChannelLine, new PointF(10f, 10f), new PointF(10f, 1000f));
-                        //if (rowNum != 0 && colNum != 0 && offset != 0)
-                        //{
-                        //    for(int i = 0; i < colNum; i++)
-                        //    {
-                        //        graBox1.DrawLine(penChannelLine, new PointF(startX+i*offset, 0), new PointF(startX + i * offset, 1000f));
-                        //    }
-                        //}
+                        
                         string data = "";
                         for (int i = 0; i < stBcrResult.nCodeNum; ++i)
                         {
@@ -663,18 +680,23 @@ namespace MSC_BasicDemo
                                 string strCode = Encoding.GetEncoding("GB2312").GetString(stBcrResult.stBcrInfoEx[i].chCode);
                                 Console.WriteLine("------------------------------------------------Get CodeNum: " + "CodeNum[" + i.ToString() + "], CodeString[" + strCode.Trim().TrimEnd('\0') + "]");
                                 data = strCode.Trim().TrimEnd('\0');
-                                decodeList.Add(data); 
-                                listBox1.Items.Add(data);
+                                //decodeList.Add(data); 
+                                //listBox1.Items.Add(data);
                             }
 
                             stPointChannel0List = new System.Drawing.Point[4];
+                            Point2f[] tempPoint = new Point2f[4];
                             for (int j = 0; j < 4; ++j)
                             {
                                 stPointChannel0List[j].X = (int)(stBcrResult.stBcrInfoEx[i].pt[j].x * (float)(pictureBox1.Size.Width) / stFrameChannel0Info.nWidth);
                                 stPointChannel0List[j].Y = (int)(stBcrResult.stBcrInfoEx[i].pt[j].y * (float)(pictureBox1.Size.Height) / stFrameChannel0Info.nHeight);
                                 //PointsROI.Add(ConvertPointToPointF(stPointChannel0List[j]));
+                                tempPoint[j] = new Point2f(stBcrResult.stBcrInfoEx[i].pt[j].x, stBcrResult.stBcrInfoEx[i].pt[j].y);
+                                //pCodeConer[j] = new Point2f((float)stBcrResult.stBcrInfoEx[i].pt[j].x * (pictureBox1.Size.Width / (float)stFrameChannel0Info.nWidth),
+                                //                (float)stBcrResult.stBcrInfoEx[i].pt[j].y * (pictureBox1.Size.Height / (float)stFrameChannel0Info.nHeight));
                             }
-                            code_data code = new code_data(data, stPointChannel0List, false, 0);
+                            pCodeConer.Add(tempPoint);
+                            code_data code = new code_data(data, tempPoint, false, 0);
                             IDMV_Data.Add(code);
                             graBox1.DrawPolygon(penChannel0, stPointChannel0List);
 
@@ -696,18 +718,47 @@ namespace MSC_BasicDemo
                             //for (int j = 0; j < 4; ++j)
                             //{
                             //    PointsROI.Add(ConvertPointToPointF(stPointChannel0List[j]));
-                                
+
                             //}
 
                             //test enlarge
                             //List<PointF> enlarged_points = GetEnlargedPolygon(PointsROI, 10f);
 
                             //graBox1.DrawPolygon(penChannelRoi, enlarged_points.ToArray());
-                            
+
                             //PointsROI.Clear();
+                            //dataGridViewShowData.BeginInvoke(new Action(() =>
+                            //{
+                            //    DataGridViewRow row = new DataGridViewRow();
+                            //    row.CreateCells(dataGridViewShowData);
+                            //    row.Cells[0].Value = i + 1;
+                            //    row.Cells[1].Value = IDMV_Data[i].getDecode();
+                            //    dataGridViewShowData.Rows.Add(row);
+
+                            //}));
                         }
+
+                        dataGridViewShowData.Rows.Clear();
+                        int iNo = 1;
+                        foreach(var codeData in IDMV_Data)
+                        {
+                            dataGridViewShowData.BeginInvoke(new Action(() =>
+                            {
+                                DataGridViewRow row = new DataGridViewRow();
+                                row.CreateCells(dataGridViewShowData);
+                                row.Cells[0].Value = iNo;
+                                row.Cells[1].Value = codeData.Decoded_string;
+                                dataGridViewShowData.Rows.Add(row);
+                                iNo++;
+                            }));
+                        }
+                        picBoxToMat();
+                        fillerImg();
+                        contourFind();
+                        drawRoi();
                         
                     }
+
 
                     MvCodeReader.MV_CODEREADER_WAYBILL_LIST stWayList = (MvCodeReader.MV_CODEREADER_WAYBILL_LIST)Marshal.PtrToStructure(stFrameChannel0Info.pstWaybillList, typeof(MvCodeReader.MV_CODEREADER_WAYBILL_LIST));
 
@@ -873,8 +924,8 @@ namespace MSC_BasicDemo
             m_hRecvChannel0Thread = new Thread(RecvChannel0Thread);
             m_hRecvChannel0Thread.Start();
 
-            m_hRecvChannel1Thread = new Thread(RecvChannel1Thread);
-            m_hRecvChannel1Thread.Start();
+            //m_hRecvChannel1Thread = new Thread(RecvChannel1Thread);
+            //m_hRecvChannel1Thread.Start();
 
             m_stChannel0FrameInfo.nFrameLen = 0;//取流之前先清除帧长度
             m_stChannel0FrameInfo.enPixelType = MvCodeReader.MvCodeReaderGvspPixelType.PixelType_CodeReader_Gvsp_Undefined;
@@ -888,7 +939,7 @@ namespace MSC_BasicDemo
             {
                 m_bGrabbing = false;
                 m_hRecvChannel0Thread.Join();
-                m_hRecvChannel1Thread.Join();
+                //m_hRecvChannel1Thread.Join();
                 ShowErrorMsg("Start Grabbing Fail!", nRet);
                 return;
             }
@@ -1194,6 +1245,26 @@ namespace MSC_BasicDemo
 
         private void button1_Click(object sender, EventArgs e)
         {
+            picBoxToMat();
+            //Bitmap bitmap = null;
+            //if (pictureBox1.Image != null)
+            //{
+            //    pictureBoxCV.Image = pictureBox1.Image;
+            //    bitmap = (Bitmap)pictureBox1.Image;
+
+            //}
+            //else
+            //{
+            //    bitmap = (Bitmap)pictureBoxCV.Image;
+            //}
+            //matImg = new Mat(5440, 3648, MatType.CV_8UC1);
+            //matImg = BitmapConverter.ToMat(bitmap);
+            //Cv2.CvtColor(matImg, matImg, ColorConversionCodes.BGRA2GRAY);
+            //Cv2.ImShow("Mat img", matImg);
+        }
+
+        public void picBoxToMat()
+        {
             Bitmap bitmap = null;
             if (pictureBox1.Image != null)
             {
@@ -1208,7 +1279,6 @@ namespace MSC_BasicDemo
             matImg = new Mat(5440, 3648, MatType.CV_8UC1);
             matImg = BitmapConverter.ToMat(bitmap);
             Cv2.CvtColor(matImg, matImg, ColorConversionCodes.BGRA2GRAY);
-            //Cv2.ImShow("Mat img", matImg);
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -1222,26 +1292,30 @@ namespace MSC_BasicDemo
         {
             //Mat grayImg = new Mat();
             //Cv2.CvtColor(matImg, grayImg,ColorConversionCodes.BGRA2GRAY);
-            OpenCvSharp.Point[][] contours;
-            HierarchyIndex[] hierarchy;
-            Cv2.FindContours(matImg, out contours, out hierarchy, RetrievalModes.Tree, ContourApproximationModes.ApproxSimple);
-            Mat result = new Mat(matImg.Size(), MatType.CV_8UC1, Scalar.Black);
 
-           
+            //code
+            //OpenCvSharp.Point[][] contours;
+            //HierarchyIndex[] hierarchy;
+            //Cv2.FindContours(matImg, out contours, out hierarchy, RetrievalModes.Tree, ContourApproximationModes.ApproxSimple);
+            //Mat result = new Mat(matImg.Size(), MatType.CV_8UC1, Scalar.Black);
 
-            foreach(var Contour in contours)
-            {
-                OpenCvSharp.Rect boundingRect = Cv2.BoundingRect(Contour);
-                if (boundingRect.Width >= minThreshold && boundingRect.Width <= maxThreshold && boundingRect.Height >= minThreshold && boundingRect.Height <= maxThreshold)
-                {
-                    contoursToKeep.Add(Contour);
-                }
-            }
+            //contoursToKeep.Clear();
 
-            for (int i = 0; i < contoursToKeep.Count; i++)
-            {
-                Cv2.DrawContours(result, contoursToKeep, i, Scalar.White, thickness: 6);
-            }
+            //foreach (var Contour in contours)
+            //{
+            //    OpenCvSharp.Rect boundingRect = Cv2.BoundingRect(Contour);
+            //    if (boundingRect.Width >= minThreshold && boundingRect.Width <= maxThreshold && boundingRect.Height >= minThreshold && boundingRect.Height <= maxThreshold)
+            //    {
+            //        contoursToKeep.Add(Contour);
+            //    }
+            //}
+
+            //for (int i = 0; i < contoursToKeep.Count; i++)
+            //{
+            //    Cv2.DrawContours(result, contoursToKeep, i, Scalar.White, thickness: 6);
+            //}
+            //code
+
 
             //Point2f point = new Point2f();
             //InputArray inputArray = contoursToKeep.ToArray();
@@ -1266,7 +1340,42 @@ namespace MSC_BasicDemo
             //    Cv2.DrawContours(result, contours, i, Scalar.White, thickness: 5);
             //}
             //Cv2.ImShow("Blobs Detection Result", matImg);
+
+
+            //pictureBoxCV.Image = result.ToBitmap();
+            contourFind();
+
+        }
+
+        public void contourFind()
+        {
+            OpenCvSharp.Point[][] contours;
+            HierarchyIndex[] hierarchy;
+            Cv2.FindContours(matImg, out contours, out hierarchy, RetrievalModes.Tree, ContourApproximationModes.ApproxSimple);
+            Mat result = new Mat(matImg.Size(), MatType.CV_8UC1, Scalar.Black);
+
+            contoursToKeep.Clear();
+
+            foreach (var Contour in contours)
+            {
+                OpenCvSharp.Rect boundingRect = Cv2.BoundingRect(Contour);
+                if (boundingRect.Width >= minThreshold && boundingRect.Width <= maxThreshold && boundingRect.Height >= minThreshold && boundingRect.Height <= maxThreshold)
+                {
+                    contoursToKeep.Add(Contour);
+                }
+            }
+
+            for (int i = 0; i < contoursToKeep.Count; i++)
+            {
+                Cv2.DrawContours(result, contoursToKeep, i, Scalar.White, thickness: 6);
+            }
+
             pictureBoxCV.Image = result.ToBitmap();
+        }
+
+        public void isCenter()
+        {
+            
         }
 
         private void numericUpDownH_ValueChanged(object sender, EventArgs e)
@@ -1341,6 +1450,128 @@ namespace MSC_BasicDemo
         private void numericUpDownR_ValueChanged(object sender, EventArgs e)
         {
             rowNum = (int)numericUpDownR.Value;
+        }
+
+        private void buttonDrawRoi_Click(object sender, EventArgs e)
+        {
+            //Mat tempImg = new Mat(5440, 3648, MatType.CV_8UC1);
+            //if (pictureBox1.Image != null)
+            //{
+            //    //Mat tempImg = new Mat(5440, 3648, MatType.CV_8UC1);
+            //    Bitmap bitmapTemp = (Bitmap)pictureBox1.Image;
+            //    tempImg = BitmapConverter.ToMat(bitmapTemp);
+            //}
+            //else
+            //{
+            //    //Mat tempImg = new Mat(5440, 3648, MatType.CV_8UC1);
+            //    Bitmap bitmapTemp = (Bitmap)pictureBoxCV.Image;
+            //    tempImg = BitmapConverter.ToMat(bitmapTemp);
+            //}
+
+            //foreach (var contour in contoursToKeep)
+            //{
+            //    RotatedRect rotatedRect = Cv2.MinAreaRect(contour);
+            //    Point2f[] vertices = Cv2.BoxPoints(rotatedRect);
+            //    OpenCvSharp.Point[] boxVertices = new OpenCvSharp.Point[4];
+            //    for (int i = 0; i < 4; i++)
+            //    {
+            //        boxVertices[i] = new OpenCvSharp.Point((int)vertices[i].X, (int)vertices[i].Y);
+            //    }
+
+            //    tempImg.Polylines(new[] { boxVertices }, true, Scalar.Red, 5);
+
+            //    //for (int i = 0; i < contours.Length; i++)
+            //    //{
+            //    //    Cv2.DrawContours(result, contours, i, Scalar.White, thickness: 5);
+            //    //}
+            //}
+            //pictureBox1.Image = tempImg.ToBitmap();
+
+            drawRoi();
+        }
+
+        public void drawRoi()
+        {
+            Mat tempImg = new Mat(5440, 3648, MatType.CV_8UC1);
+            if (pictureBox1.Image != null)
+            {
+                //Bitmap bitmapTemp = new Bitmap(5440, 3648);
+                //pictureBox1.DrawToBitmap(bitmapTemp, pictureBox1.ClientRectangle);
+                //Mat tempImg = new Mat(5440, 3648, MatType.CV_8UC1);
+                Bitmap bitmapTemp = (Bitmap)pictureBox1.Image;
+                tempImg = BitmapConverter.ToMat(bitmapTemp);
+            }
+            else
+            {
+                //Mat tempImg = new Mat(5440, 3648, MatType.CV_8UC1);
+                Bitmap bitmapTemp = (Bitmap)pictureBoxCV.Image;
+                tempImg = BitmapConverter.ToMat(bitmapTemp);
+            }
+
+            foreach (var contour in contoursToKeep)
+            {
+                RotatedRect rotatedRect = Cv2.MinAreaRect(contour);
+                Point2f[] vertices = Cv2.BoxPoints(rotatedRect);
+                OpenCvSharp.Point[] boxVertices = new OpenCvSharp.Point[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    boxVertices[i] = new OpenCvSharp.Point((int)vertices[i].X, (int)vertices[i].Y);
+                }
+
+                tempImg.Polylines(new[] { boxVertices }, true, Scalar.Red, 5);
+
+                //for (int i = 0; i < contours.Length; i++)
+                //{
+                //    Cv2.DrawContours(result, contours, i, Scalar.White, thickness: 5);
+                //}
+            }
+            DrawCodeConder(tempImg);
+            pictureBox1.Image = tempImg.ToBitmap();
+        }
+
+        private void buttonProcess_Click(object sender, EventArgs e)
+        {
+            //Cv2.AdaptiveThreshold(matImg, matImg, 255, AdaptiveThresholdTypes.MeanC, ThresholdTypes.Binary, 777, -15);
+            //matImg = Mophology(7, 5, MorphTypes.Open, matImg);
+            //matImg = Mophology(33, 2, MorphTypes.Dilate, matImg);
+            //pictureBoxCV.Image = matImg.ToBitmap() ;
+            fillerImg();
+        }
+
+        public void fillerImg()
+        {
+            Cv2.AdaptiveThreshold(matImg, matImg, 255, AdaptiveThresholdTypes.MeanC, ThresholdTypes.Binary, 777, -15);
+            matImg = Mophology(7, 5, MorphTypes.Open, matImg);
+            matImg = Mophology(33, 2, MorphTypes.Dilate, matImg);
+            pictureBoxCV.Image = matImg.ToBitmap();
+        }
+
+        private void buttonDrawConer_Click(object sender, EventArgs e)
+        {
+            
+            //foreach(var point in pCodeConer)
+            //{
+            //    OpenCvSharp.Point[] boxVertices = new OpenCvSharp.Point[4];
+            //    for (int i = 0; i < 4; i++)
+            //    {
+            //        boxVertices[i] = new OpenCvSharp.Point((int)point[i].X, (int)point[i].Y);
+            //    }
+            //    matImg.Polylines(new[] { boxVertices }, true, Scalar.Blue, 5);
+            //}
+            //pictureBox1.Image = matImg.ToBitmap() ;
+        }
+
+        public void DrawCodeConder(Mat img)
+        {
+            foreach (var point in pCodeConer)
+            {
+                OpenCvSharp.Point[] boxVertices = new OpenCvSharp.Point[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    boxVertices[i] = new OpenCvSharp.Point((int)point[i].X, (int)point[i].Y);
+                }
+                img.Polylines(new[] { boxVertices }, true, Scalar.Blue, 5);
+            }
         }
 
         static PointF ConvertPointToPointF(System.Drawing.Point point)

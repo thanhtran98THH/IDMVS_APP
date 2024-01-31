@@ -67,6 +67,7 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.buttonLoad = new System.Windows.Forms.Button();
             this.buttonRoi = new System.Windows.Forms.Button();
             this.numericUpDownBinary = new System.Windows.Forms.NumericUpDown();
             this.label10 = new System.Windows.Forms.Label();
@@ -80,7 +81,12 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.pictureBoxCV = new System.Windows.Forms.PictureBox();
-            this.buttonLoad = new System.Windows.Forms.Button();
+            this.buttonProcess = new System.Windows.Forms.Button();
+            this.dataGridViewShowData = new System.Windows.Forms.DataGridView();
+            this.No = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.data = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.buttonDrawRoi = new System.Windows.Forms.Button();
+            this.buttonDrawConer = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -103,6 +109,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThresholdMin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThresholdMax)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCV)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewShowData)).BeginInit();
             this.SuspendLayout();
             // 
             // cbDeviceList
@@ -508,6 +515,7 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.dataGridViewShowData);
             this.splitContainer1.Panel2.Controls.Add(this.groupBox2);
             this.splitContainer1.Panel2.Controls.Add(this.groupBox3);
             this.splitContainer1.Panel2.Controls.Add(this.groupBox4);
@@ -520,6 +528,8 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.buttonDrawConer);
+            this.groupBox3.Controls.Add(this.buttonDrawRoi);
             this.groupBox3.Controls.Add(this.label4);
             this.groupBox3.Controls.Add(this.numericUpDownH);
             this.groupBox3.Controls.Add(this.numericUpDownR);
@@ -528,13 +538,14 @@
             this.groupBox3.Controls.Add(this.label5);
             this.groupBox3.Location = new System.Drawing.Point(267, 534);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(229, 161);
+            this.groupBox3.Size = new System.Drawing.Size(242, 206);
             this.groupBox3.TabIndex = 19;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "groupBox3";
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.buttonProcess);
             this.tabPage2.Controls.Add(this.buttonLoad);
             this.tabPage2.Controls.Add(this.buttonRoi);
             this.tabPage2.Controls.Add(this.numericUpDownBinary);
@@ -557,6 +568,16 @@
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // buttonLoad
+            // 
+            this.buttonLoad.Location = new System.Drawing.Point(1357, 679);
+            this.buttonLoad.Name = "buttonLoad";
+            this.buttonLoad.Size = new System.Drawing.Size(90, 41);
+            this.buttonLoad.TabIndex = 11;
+            this.buttonLoad.Text = "Load";
+            this.buttonLoad.UseVisualStyleBackColor = true;
+            this.buttonLoad.Click += new System.EventHandler(this.buttonLoad_Click);
+            // 
             // buttonRoi
             // 
             this.buttonRoi.Location = new System.Drawing.Point(1343, 183);
@@ -569,7 +590,7 @@
             // 
             // numericUpDownBinary
             // 
-            this.numericUpDownBinary.Location = new System.Drawing.Point(1357, 296);
+            this.numericUpDownBinary.Location = new System.Drawing.Point(1357, 525);
             this.numericUpDownBinary.Name = "numericUpDownBinary";
             this.numericUpDownBinary.Size = new System.Drawing.Size(120, 20);
             this.numericUpDownBinary.TabIndex = 9;
@@ -583,7 +604,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(1321, 298);
+            this.label10.Location = new System.Drawing.Point(1321, 527);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(36, 13);
             this.label10.TabIndex = 8;
@@ -592,7 +613,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(1324, 272);
+            this.label9.Location = new System.Drawing.Point(1324, 501);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(27, 13);
             this.label9.TabIndex = 7;
@@ -601,7 +622,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(1321, 246);
+            this.label8.Location = new System.Drawing.Point(1321, 475);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(30, 13);
             this.label8.TabIndex = 7;
@@ -609,7 +630,7 @@
             // 
             // numericUpDownThresholdMin
             // 
-            this.numericUpDownThresholdMin.Location = new System.Drawing.Point(1357, 270);
+            this.numericUpDownThresholdMin.Location = new System.Drawing.Point(1357, 499);
             this.numericUpDownThresholdMin.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -619,7 +640,7 @@
             this.numericUpDownThresholdMin.Size = new System.Drawing.Size(120, 20);
             this.numericUpDownThresholdMin.TabIndex = 6;
             this.numericUpDownThresholdMin.Value = new decimal(new int[] {
-            80,
+            100,
             0,
             0,
             0});
@@ -627,7 +648,7 @@
             // 
             // numericUpDownThresholdMax
             // 
-            this.numericUpDownThresholdMax.Location = new System.Drawing.Point(1357, 244);
+            this.numericUpDownThresholdMax.Location = new System.Drawing.Point(1357, 473);
             this.numericUpDownThresholdMax.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -637,7 +658,7 @@
             this.numericUpDownThresholdMax.Size = new System.Drawing.Size(120, 20);
             this.numericUpDownThresholdMax.TabIndex = 6;
             this.numericUpDownThresholdMax.Value = new decimal(new int[] {
-            85,
+            150,
             0,
             0,
             0});
@@ -703,15 +724,58 @@
             this.pictureBoxCV.TabIndex = 0;
             this.pictureBoxCV.TabStop = false;
             // 
-            // buttonLoad
+            // buttonProcess
             // 
-            this.buttonLoad.Location = new System.Drawing.Point(1357, 679);
-            this.buttonLoad.Name = "buttonLoad";
-            this.buttonLoad.Size = new System.Drawing.Size(90, 41);
-            this.buttonLoad.TabIndex = 11;
-            this.buttonLoad.Text = "Load";
-            this.buttonLoad.UseVisualStyleBackColor = true;
-            this.buttonLoad.Click += new System.EventHandler(this.buttonLoad_Click);
+            this.buttonProcess.Location = new System.Drawing.Point(1343, 225);
+            this.buttonProcess.Name = "buttonProcess";
+            this.buttonProcess.Size = new System.Drawing.Size(75, 23);
+            this.buttonProcess.TabIndex = 12;
+            this.buttonProcess.Text = "Filter";
+            this.buttonProcess.UseVisualStyleBackColor = true;
+            this.buttonProcess.Click += new System.EventHandler(this.buttonProcess_Click);
+            // 
+            // dataGridViewShowData
+            // 
+            this.dataGridViewShowData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewShowData.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.No,
+            this.data});
+            this.dataGridViewShowData.Location = new System.Drawing.Point(3, 49);
+            this.dataGridViewShowData.Name = "dataGridViewShowData";
+            this.dataGridViewShowData.Size = new System.Drawing.Size(257, 691);
+            this.dataGridViewShowData.TabIndex = 20;
+            // 
+            // No
+            // 
+            this.No.HeaderText = "No";
+            this.No.Name = "No";
+            this.No.Width = 50;
+            // 
+            // data
+            // 
+            this.data.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.data.HeaderText = "Code";
+            this.data.Name = "data";
+            // 
+            // buttonDrawRoi
+            // 
+            this.buttonDrawRoi.Location = new System.Drawing.Point(13, 118);
+            this.buttonDrawRoi.Name = "buttonDrawRoi";
+            this.buttonDrawRoi.Size = new System.Drawing.Size(88, 49);
+            this.buttonDrawRoi.TabIndex = 14;
+            this.buttonDrawRoi.Text = "ROI";
+            this.buttonDrawRoi.UseVisualStyleBackColor = true;
+            this.buttonDrawRoi.Click += new System.EventHandler(this.buttonDrawRoi_Click);
+            // 
+            // buttonDrawConer
+            // 
+            this.buttonDrawConer.Location = new System.Drawing.Point(126, 118);
+            this.buttonDrawConer.Name = "buttonDrawConer";
+            this.buttonDrawConer.Size = new System.Drawing.Size(88, 49);
+            this.buttonDrawConer.TabIndex = 14;
+            this.buttonDrawConer.Text = "CONER";
+            this.buttonDrawConer.UseVisualStyleBackColor = true;
+            this.buttonDrawConer.Click += new System.EventHandler(this.buttonDrawConer_Click);
             // 
             // Form1
             // 
@@ -753,6 +817,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThresholdMin)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThresholdMax)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCV)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewShowData)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -813,6 +878,12 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Button buttonRoi;
         private System.Windows.Forms.Button buttonLoad;
+        private System.Windows.Forms.Button buttonProcess;
+        private System.Windows.Forms.DataGridView dataGridViewShowData;
+        private System.Windows.Forms.DataGridViewTextBoxColumn No;
+        private System.Windows.Forms.DataGridViewTextBoxColumn data;
+        private System.Windows.Forms.Button buttonDrawRoi;
+        private System.Windows.Forms.Button buttonDrawConer;
     }
 }
 
