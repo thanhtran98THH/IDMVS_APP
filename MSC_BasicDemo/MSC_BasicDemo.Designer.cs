@@ -89,6 +89,8 @@
             this.pictureBoxCV = new System.Windows.Forms.PictureBox();
             this.buttonMatching = new System.Windows.Forms.Button();
             this.buttonPutText = new System.Windows.Forms.Button();
+            this.buttonSortROi = new System.Windows.Forms.Button();
+            this.buttonNewRoi = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -553,6 +555,8 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.buttonNewRoi);
+            this.groupBox3.Controls.Add(this.buttonSortROi);
             this.groupBox3.Controls.Add(this.buttonPutText);
             this.groupBox3.Controls.Add(this.buttonMatching);
             this.groupBox3.Controls.Add(this.buttonDrawConer);
@@ -574,7 +578,7 @@
             // 
             this.buttonDrawConer.Location = new System.Drawing.Point(107, 98);
             this.buttonDrawConer.Name = "buttonDrawConer";
-            this.buttonDrawConer.Size = new System.Drawing.Size(88, 49);
+            this.buttonDrawConer.Size = new System.Drawing.Size(88, 19);
             this.buttonDrawConer.TabIndex = 14;
             this.buttonDrawConer.Text = "CONER";
             this.buttonDrawConer.UseVisualStyleBackColor = true;
@@ -584,7 +588,7 @@
             // 
             this.buttonDrawRoi.Location = new System.Drawing.Point(13, 98);
             this.buttonDrawRoi.Name = "buttonDrawRoi";
-            this.buttonDrawRoi.Size = new System.Drawing.Size(88, 49);
+            this.buttonDrawRoi.Size = new System.Drawing.Size(88, 19);
             this.buttonDrawRoi.TabIndex = 14;
             this.buttonDrawRoi.Text = "ROI";
             this.buttonDrawRoi.UseVisualStyleBackColor = true;
@@ -801,6 +805,26 @@
             this.buttonPutText.UseVisualStyleBackColor = true;
             this.buttonPutText.Click += new System.EventHandler(this.buttonPutText_Click);
             // 
+            // buttonSortROi
+            // 
+            this.buttonSortROi.Location = new System.Drawing.Point(17, 123);
+            this.buttonSortROi.Name = "buttonSortROi";
+            this.buttonSortROi.Size = new System.Drawing.Size(75, 23);
+            this.buttonSortROi.TabIndex = 17;
+            this.buttonSortROi.Text = "Sort ROi";
+            this.buttonSortROi.UseVisualStyleBackColor = true;
+            this.buttonSortROi.Click += new System.EventHandler(this.buttonSortROi_Click);
+            // 
+            // buttonNewRoi
+            // 
+            this.buttonNewRoi.Location = new System.Drawing.Point(120, 134);
+            this.buttonNewRoi.Name = "buttonNewRoi";
+            this.buttonNewRoi.Size = new System.Drawing.Size(75, 23);
+            this.buttonNewRoi.TabIndex = 18;
+            this.buttonNewRoi.Text = "new roi";
+            this.buttonNewRoi.UseVisualStyleBackColor = true;
+            this.buttonNewRoi.Click += new System.EventHandler(this.buttonNewRoi_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -910,6 +934,8 @@
         private System.Windows.Forms.Button buttonDrawConer;
         private System.Windows.Forms.Button buttonMatching;
         private System.Windows.Forms.Button buttonPutText;
+        private System.Windows.Forms.Button buttonSortROi;
+        private System.Windows.Forms.Button buttonNewRoi;
     }
 }
 

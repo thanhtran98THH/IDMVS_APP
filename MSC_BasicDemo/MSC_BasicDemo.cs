@@ -680,6 +680,9 @@ namespace MSC_BasicDemo
                         {
                             // test decode data
                             bool bIsValidUTF8 = IsTextUTF8(stBcrResult.stBcrInfoEx[i].chCode);
+                            int angle = stBcrResult.stBcrInfoEx[i].nAngle;
+                            
+
                             if (bIsValidUTF8)
                             {
                                 string strCode = Encoding.UTF8.GetString(stBcrResult.stBcrInfoEx[i].chCode);
@@ -694,6 +697,9 @@ namespace MSC_BasicDemo
                                 //decodeList.Add(data); 
                                 //listBox1.Items.Add(data);
                             }
+
+
+                            Console.WriteLine(data + $" angle: {angle}");
 
                             stPointChannel0List = new System.Drawing.Point[4];
                             Point2f[] tempPoint = new Point2f[4];
@@ -766,6 +772,7 @@ namespace MSC_BasicDemo
                         picBoxToMat();
                         fillerImg();
                         contourFind();
+
                         drawRoi();
                         matchingCode();
                     }
@@ -1589,6 +1596,7 @@ namespace MSC_BasicDemo
 
         private void buttonMatching_Click(object sender, EventArgs e)
         {
+            SortCode();
             matchingCode();
         }
 
@@ -1633,6 +1641,11 @@ namespace MSC_BasicDemo
             }
         }
 
+        private void buttonSortROi_Click(object sender, EventArgs e)
+        {
+            SortRoi();
+        }
+
         public static Point2f FindCenterPoint(Point2f[] points)
         {
             if (points.Length != 4)
@@ -1665,6 +1678,11 @@ namespace MSC_BasicDemo
                 return false;
         }
 
+        private void buttonNewRoi_Click(object sender, EventArgs e)
+        {
+            DrawNewRoi();
+        }
+
         public void matchingCode()
         {
             //pictureBox1.Image = matImg.ToBitmap();
@@ -1686,7 +1704,7 @@ namespace MSC_BasicDemo
                         bool isMatch = isInside(centerP, ROI);
                         if (isMatch)
                         {
-                            Console.WriteLine($"{centerP} inside {ROI[0].X};{ROI[0].Y}");
+                            Console.WriteLine($"{centerP} inside {ROI[0].X}:{ROI[0].Y}");
                             //Cv2.PutText(matImg, i.ToString(), (OpenCvSharp.Point)centerP, HersheyFonts.HersheyPlain,50, Scalar.Red);
                             Cv2.PutText(matImg, (codeData.Cindex + 1).ToString(), ROI[0], fontFace, fontScale, color, thickness, lineType);
                             codeData.IsSorted = true;
@@ -1695,6 +1713,70 @@ namespace MSC_BasicDemo
                 }
             }
             pictureBox1.Image = matImg.ToBitmap();
+        }
+
+        public void SortCode()
+        {
+            IDMV_Data = IDMV_Data.OrderBy(data => data.Code_coner[0].X).ThenBy(data => data.Code_coner[0].Y).ToList();
+            int i = 1;
+            foreach(var codeData in IDMV_Data)
+            {
+                codeData.Cindex = i;
+                i++;
+            }
+        }
+
+        public void SortRoi()
+        {
+            contoursToKeep = contoursToKeep.OrderBy(data => data[0].X).ThenBy(data => data[0].Y).ToList() ;
+            for(int i = 0; i < contoursToKeep.Count; i++)
+            {
+                Cv2.PutText(matImg, (i + 1).ToString(), new OpenCvSharp.Point(contoursToKeep[i][0].X, contoursToKeep[i][0].Y), fontFace, fontScale, color, thickness, lineType) ;
+            }
+            pictureBox1.Image = matImg.ToBitmap();
+        }
+
+        public void DrawNewRoi()
+        {
+            Mat tempImg = new Mat(5440, 3648, MatType.CV_8UC1);
+            if (pictureBox1.Image != null)
+            {
+                //Bitmap bitmapTemp = new Bitmap(5440, 3648);
+                //pictureBox1.DrawToBitmap(bitmapTemp, pictureBox1.ClientRectangle);
+                //Mat tempImg = new Mat(5440, 3648, MatType.CV_8UC1);
+                Bitmap bitmapTemp = (Bitmap)pictureBox1.Image;
+                tempImg = BitmapConverter.ToMat(bitmapTemp);
+            }
+            else
+            {
+                //Mat tempImg = new Mat(5440, 3648, MatType.CV_8UC1);
+                Bitmap bitmapTemp = (Bitmap)pictureBoxCV.Image;
+                tempImg = BitmapConverter.ToMat(bitmapTemp);
+            }
+
+            foreach (var contour in contoursToKeep)
+            {
+                RotatedRect rotatedRect = Cv2.MinAreaRect(contour);
+                Point2f[] vertices = Cv2.BoxPoints(rotatedRect);
+                OpenCvSharp.Point[] boxVertices = new OpenCvSharp.Point[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    boxVertices[i] = new OpenCvSharp.Point((int)vertices[i].X, (int)vertices[i].Y);
+                }
+                bool bHasCode = false;
+                foreach(var code in IDMV_Data)
+                {
+                    Point2f centerP = FindCenterPoint(code.Code_coner);
+                    bool bHasCode2 = isInside(centerP, contour);
+                }
+                tempImg.Polylines(new[] { boxVertices }, true, bHasCode? Scalar.Green : Scalar.Red, 5);
+
+                //for (int i = 0; i < contours.Length; i++)
+                //{
+                //    Cv2.DrawContours(result, contours, i, Scalar.White, thickness: 5);
+                //}
+            }
+            pictureBox1.Image = tempImg.ToBitmap() ;
         }
     }
 }
