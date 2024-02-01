@@ -65,8 +65,14 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.dataGridViewShowData = new System.Windows.Forms.DataGridView();
+            this.No = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.data = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.buttonDrawConer = new System.Windows.Forms.Button();
+            this.buttonDrawRoi = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.buttonProcess = new System.Windows.Forms.Button();
             this.buttonLoad = new System.Windows.Forms.Button();
             this.buttonRoi = new System.Windows.Forms.Button();
             this.numericUpDownBinary = new System.Windows.Forms.NumericUpDown();
@@ -81,12 +87,8 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.pictureBoxCV = new System.Windows.Forms.PictureBox();
-            this.buttonProcess = new System.Windows.Forms.Button();
-            this.dataGridViewShowData = new System.Windows.Forms.DataGridView();
-            this.No = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.data = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.buttonDrawRoi = new System.Windows.Forms.Button();
-            this.buttonDrawConer = new System.Windows.Forms.Button();
+            this.buttonMatching = new System.Windows.Forms.Button();
+            this.buttonPutText = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -103,13 +105,13 @@
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewShowData)).BeginInit();
             this.groupBox3.SuspendLayout();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownBinary)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThresholdMin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThresholdMax)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCV)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewShowData)).BeginInit();
             this.SuspendLayout();
             // 
             // cbDeviceList
@@ -526,8 +528,33 @@
             this.splitContainer1.SplitterDistance = 964;
             this.splitContainer1.TabIndex = 21;
             // 
+            // dataGridViewShowData
+            // 
+            this.dataGridViewShowData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewShowData.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.No,
+            this.data});
+            this.dataGridViewShowData.Location = new System.Drawing.Point(3, 49);
+            this.dataGridViewShowData.Name = "dataGridViewShowData";
+            this.dataGridViewShowData.Size = new System.Drawing.Size(257, 691);
+            this.dataGridViewShowData.TabIndex = 20;
+            // 
+            // No
+            // 
+            this.No.HeaderText = "No";
+            this.No.Name = "No";
+            this.No.Width = 50;
+            // 
+            // data
+            // 
+            this.data.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.data.HeaderText = "Code";
+            this.data.Name = "data";
+            // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.buttonPutText);
+            this.groupBox3.Controls.Add(this.buttonMatching);
             this.groupBox3.Controls.Add(this.buttonDrawConer);
             this.groupBox3.Controls.Add(this.buttonDrawRoi);
             this.groupBox3.Controls.Add(this.label4);
@@ -542,6 +569,26 @@
             this.groupBox3.TabIndex = 19;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "groupBox3";
+            // 
+            // buttonDrawConer
+            // 
+            this.buttonDrawConer.Location = new System.Drawing.Point(107, 98);
+            this.buttonDrawConer.Name = "buttonDrawConer";
+            this.buttonDrawConer.Size = new System.Drawing.Size(88, 49);
+            this.buttonDrawConer.TabIndex = 14;
+            this.buttonDrawConer.Text = "CONER";
+            this.buttonDrawConer.UseVisualStyleBackColor = true;
+            this.buttonDrawConer.Click += new System.EventHandler(this.buttonDrawConer_Click);
+            // 
+            // buttonDrawRoi
+            // 
+            this.buttonDrawRoi.Location = new System.Drawing.Point(13, 98);
+            this.buttonDrawRoi.Name = "buttonDrawRoi";
+            this.buttonDrawRoi.Size = new System.Drawing.Size(88, 49);
+            this.buttonDrawRoi.TabIndex = 14;
+            this.buttonDrawRoi.Text = "ROI";
+            this.buttonDrawRoi.UseVisualStyleBackColor = true;
+            this.buttonDrawRoi.Click += new System.EventHandler(this.buttonDrawRoi_Click);
             // 
             // tabPage2
             // 
@@ -567,6 +614,16 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // buttonProcess
+            // 
+            this.buttonProcess.Location = new System.Drawing.Point(1343, 225);
+            this.buttonProcess.Name = "buttonProcess";
+            this.buttonProcess.Size = new System.Drawing.Size(75, 23);
+            this.buttonProcess.TabIndex = 12;
+            this.buttonProcess.Text = "Filter";
+            this.buttonProcess.UseVisualStyleBackColor = true;
+            this.buttonProcess.Click += new System.EventHandler(this.buttonProcess_Click);
             // 
             // buttonLoad
             // 
@@ -640,7 +697,7 @@
             this.numericUpDownThresholdMin.Size = new System.Drawing.Size(120, 20);
             this.numericUpDownThresholdMin.TabIndex = 6;
             this.numericUpDownThresholdMin.Value = new decimal(new int[] {
-            100,
+            90,
             0,
             0,
             0});
@@ -724,58 +781,25 @@
             this.pictureBoxCV.TabIndex = 0;
             this.pictureBoxCV.TabStop = false;
             // 
-            // buttonProcess
+            // buttonMatching
             // 
-            this.buttonProcess.Location = new System.Drawing.Point(1343, 225);
-            this.buttonProcess.Name = "buttonProcess";
-            this.buttonProcess.Size = new System.Drawing.Size(75, 23);
-            this.buttonProcess.TabIndex = 12;
-            this.buttonProcess.Text = "Filter";
-            this.buttonProcess.UseVisualStyleBackColor = true;
-            this.buttonProcess.Click += new System.EventHandler(this.buttonProcess_Click);
+            this.buttonMatching.Location = new System.Drawing.Point(22, 163);
+            this.buttonMatching.Name = "buttonMatching";
+            this.buttonMatching.Size = new System.Drawing.Size(75, 23);
+            this.buttonMatching.TabIndex = 15;
+            this.buttonMatching.Text = "Match code";
+            this.buttonMatching.UseVisualStyleBackColor = true;
+            this.buttonMatching.Click += new System.EventHandler(this.buttonMatching_Click);
             // 
-            // dataGridViewShowData
+            // buttonPutText
             // 
-            this.dataGridViewShowData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewShowData.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.No,
-            this.data});
-            this.dataGridViewShowData.Location = new System.Drawing.Point(3, 49);
-            this.dataGridViewShowData.Name = "dataGridViewShowData";
-            this.dataGridViewShowData.Size = new System.Drawing.Size(257, 691);
-            this.dataGridViewShowData.TabIndex = 20;
-            // 
-            // No
-            // 
-            this.No.HeaderText = "No";
-            this.No.Name = "No";
-            this.No.Width = 50;
-            // 
-            // data
-            // 
-            this.data.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.data.HeaderText = "Code";
-            this.data.Name = "data";
-            // 
-            // buttonDrawRoi
-            // 
-            this.buttonDrawRoi.Location = new System.Drawing.Point(13, 118);
-            this.buttonDrawRoi.Name = "buttonDrawRoi";
-            this.buttonDrawRoi.Size = new System.Drawing.Size(88, 49);
-            this.buttonDrawRoi.TabIndex = 14;
-            this.buttonDrawRoi.Text = "ROI";
-            this.buttonDrawRoi.UseVisualStyleBackColor = true;
-            this.buttonDrawRoi.Click += new System.EventHandler(this.buttonDrawRoi_Click);
-            // 
-            // buttonDrawConer
-            // 
-            this.buttonDrawConer.Location = new System.Drawing.Point(126, 118);
-            this.buttonDrawConer.Name = "buttonDrawConer";
-            this.buttonDrawConer.Size = new System.Drawing.Size(88, 49);
-            this.buttonDrawConer.TabIndex = 14;
-            this.buttonDrawConer.Text = "CONER";
-            this.buttonDrawConer.UseVisualStyleBackColor = true;
-            this.buttonDrawConer.Click += new System.EventHandler(this.buttonDrawConer_Click);
+            this.buttonPutText.Location = new System.Drawing.Point(115, 163);
+            this.buttonPutText.Name = "buttonPutText";
+            this.buttonPutText.Size = new System.Drawing.Size(75, 23);
+            this.buttonPutText.TabIndex = 16;
+            this.buttonPutText.Text = "Put Text";
+            this.buttonPutText.UseVisualStyleBackColor = true;
+            this.buttonPutText.Click += new System.EventHandler(this.buttonPutText_Click);
             // 
             // Form1
             // 
@@ -809,6 +833,7 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewShowData)).EndInit();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.tabPage2.ResumeLayout(false);
@@ -817,7 +842,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThresholdMin)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownThresholdMax)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCV)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewShowData)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -884,6 +908,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn data;
         private System.Windows.Forms.Button buttonDrawRoi;
         private System.Windows.Forms.Button buttonDrawConer;
+        private System.Windows.Forms.Button buttonMatching;
+        private System.Windows.Forms.Button buttonPutText;
     }
 }
 

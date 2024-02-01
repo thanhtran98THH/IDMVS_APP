@@ -20,6 +20,8 @@ using System.Security.Cryptography.X509Certificates;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System.Reflection;
+using static MSC_BasicDemo.Form1;
+//using static System.Net.Mime.MediaTypeNames;
 
 
 namespace MSC_BasicDemo
@@ -61,11 +63,17 @@ namespace MSC_BasicDemo
         int rowNum, colNum, offset, startX, StartY;
         Mat matImg = new Mat();
         public int maxThreshold = 150;
-        public int minThreshold = 100;
+        public int minThreshold = 90;
         public int binary = 100;
         public List<code_data> IDMV_Data = new List<code_data>();
         List<OpenCvSharp.Point[]> contoursToKeep = new List<OpenCvSharp.Point[]>();
         List<Point2f[]> pCodeConer = new List<Point2f[]>();
+
+        HersheyFonts fontFace = HersheyFonts.HersheyPlain;
+        double fontScale = 5;
+        Scalar color = Scalar.GreenYellow;
+        int thickness = 5;
+        LineTypes lineType = LineTypes.AntiAlias;
 
         public class code_data
         {
@@ -73,13 +81,15 @@ namespace MSC_BasicDemo
             public Point2f[] Code_coner { get; set; }
             public bool IsSorted { get; set; }
             public int iCenterP { get; set; }
+            public int Cindex { get; set; }
 
-            public code_data(string decoded_string, Point2f[] code_coner, bool isSorted, int iCenter)
+            public code_data(string decoded_string, Point2f[] code_coner, bool isSorted, int iCenter, int index)
             {
                 Decoded_string = decoded_string;
                 Code_coner = code_coner;
                 IsSorted = isSorted;
                 iCenterP = iCenter;
+                Cindex = index;
             }
 
             public string getDecode()
@@ -697,7 +707,7 @@ namespace MSC_BasicDemo
                                 //                (float)stBcrResult.stBcrInfoEx[i].pt[j].y * (pictureBox1.Size.Height / (float)stFrameChannel0Info.nHeight));
                             }
                             pCodeConer.Add(tempPoint);
-                            code_data code = new code_data(data, tempPoint, false, 0);
+                            code_data code = new code_data(data, tempPoint, false, 0, i);
                             IDMV_Data.Add(code);
                             graBox1.DrawPolygon(penChannel0, stPointChannel0List);
 
@@ -757,7 +767,7 @@ namespace MSC_BasicDemo
                         fillerImg();
                         contourFind();
                         drawRoi();
-
+                        matchingCode();
                     }
 
 
@@ -1374,11 +1384,6 @@ namespace MSC_BasicDemo
             pictureBoxCV.Image = result.ToBitmap();
         }
 
-        public void isCenter()
-        {
-
-        }
-
         private void numericUpDownH_ValueChanged(object sender, EventArgs e)
         {
             colNum = (int)numericUpDownH.Value;
@@ -1528,6 +1533,7 @@ namespace MSC_BasicDemo
             }
             DrawCodeConder(tempImg);
             pictureBox1.Image = tempImg.ToBitmap();
+            matImg = tempImg;
         }
 
         private void buttonProcess_Click(object sender, EventArgs e)
@@ -1581,6 +1587,24 @@ namespace MSC_BasicDemo
             return new PointF(point.X, point.Y);
         }
 
+        private void buttonMatching_Click(object sender, EventArgs e)
+        {
+            matchingCode();
+        }
+
+        private void buttonPutText_Click(object sender, EventArgs e)
+        {
+            //HersheyFonts fontFace = HersheyFonts.HersheyPlain;
+            //double fontScale = 1.5;
+            //Scalar color = Scalar.White;
+            //int thickness = 2;
+            //LineTypes lineType = LineTypes.AntiAlias;
+            //OpenCvSharp.Point org = new OpenCvSharp.Point(1500, 1500);
+            //string text = "LAOOOOOOOOOOO";
+            //Cv2.PutText(matImg, text, org, fontFace, fontScale, color, thickness, lineType);
+            //pictureBox1.Image = matImg.ToBitmap();
+        }
+
         public static Mat Mophology(int iSize, int iLoop, MorphTypes iType, Mat mIn)
         {
             Mat mMophology = new Mat();
@@ -1628,9 +1652,11 @@ namespace MSC_BasicDemo
             return new Point2f(centerX, centerY);
         }
 
-        public bool isInside(Point2f point, InputArray contours)
+        public bool isInside(Point2f point, OpenCvSharp.Point[] contour)
         {
-            double distance = Cv2.PointPolygonTest(contours, point, false);
+            InputArray temp = InputArray.Create(contour);
+
+            double distance = Cv2.PointPolygonTest(temp, point, false);
             if (distance >= 0)
             {
                 return true;
@@ -1639,5 +1665,36 @@ namespace MSC_BasicDemo
                 return false;
         }
 
+        public void matchingCode()
+        {
+            //pictureBox1.Image = matImg.ToBitmap();
+            //Thread.Sleep(100);
+            foreach (var codeData in IDMV_Data)
+            {
+                Console.WriteLine($"Matching {codeData.Decoded_string}");
+                Point2f centerP = FindCenterPoint(codeData.Code_coner);
+                Console.WriteLine($"Center Point = {centerP}");
+                if (codeData.IsSorted)
+                {
+                    Console.WriteLine($"Data No {codeData.Cindex} sorted");
+                    continue;
+                }
+                else
+                {
+                    foreach (var ROI in contoursToKeep)
+                    {
+                        bool isMatch = isInside(centerP, ROI);
+                        if (isMatch)
+                        {
+                            Console.WriteLine($"{centerP} inside {ROI[0].X};{ROI[0].Y}");
+                            //Cv2.PutText(matImg, i.ToString(), (OpenCvSharp.Point)centerP, HersheyFonts.HersheyPlain,50, Scalar.Red);
+                            Cv2.PutText(matImg, (codeData.Cindex + 1).ToString(), ROI[0], fontFace, fontScale, color, thickness, lineType);
+                            codeData.IsSorted = true;
+                        }
+                    }
+                }
+            }
+            pictureBox1.Image = matImg.ToBitmap();
+        }
     }
 }
