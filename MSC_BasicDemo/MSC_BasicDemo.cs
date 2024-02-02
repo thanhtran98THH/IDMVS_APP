@@ -617,218 +617,237 @@ namespace MSC_BasicDemo
 
             while (m_bGrabbing)
             {
-                nRet = m_MyCamera.MV_CODEREADER_MSC_GetOneFrameTimeout_NET(ref pData, pstChannel0InfoEx2, 0, 1000);
-                if (nRet == MvCodeReader.MV_CODEREADER_OK)
+                try
                 {
-                    stFrameChannel0Info = (MvCodeReader.MV_CODEREADER_IMAGE_OUT_INFO_EX2)Marshal.PtrToStructure(pstChannel0InfoEx2, typeof(MvCodeReader.MV_CODEREADER_IMAGE_OUT_INFO_EX2));
-                    m_stChannel0FrameInfo = stFrameChannel0Info;
-                }
 
-                if (nRet == MvCodeReader.MV_CODEREADER_OK)
-                {
-                    if (0 >= stFrameChannel0Info.nFrameLen)
+                    nRet = m_MyCamera.MV_CODEREADER_MSC_GetOneFrameTimeout_NET(ref pData, pstChannel0InfoEx2, 0, 1000);
+                    if (nRet == MvCodeReader.MV_CODEREADER_OK)
                     {
+                        stFrameChannel0Info = (MvCodeReader.MV_CODEREADER_IMAGE_OUT_INFO_EX2)Marshal.PtrToStructure(pstChannel0InfoEx2, typeof(MvCodeReader.MV_CODEREADER_IMAGE_OUT_INFO_EX2));
+                        m_stChannel0FrameInfo = stFrameChannel0Info;
+                    }
+
+                    if (nRet == MvCodeReader.MV_CODEREADER_OK)
+                    {
+                        if (0 >= stFrameChannel0Info.nFrameLen)
+                        {
+                            continue;
+                        }
+
+                        // 通道0绘制图像
+                        Marshal.Copy(pData, m_BufForChannel0Driver, 0, (int)stFrameChannel0Info.nFrameLen);
+                        if (stFrameChannel0Info.enPixelType == MvCodeReader.MvCodeReaderGvspPixelType.PixelType_CodeReader_Gvsp_Mono8)
+                        {
+                            IntPtr pImage = Marshal.UnsafeAddrOfPinnedArrayElement(m_BufForChannel0Driver, 0);
+                            bmp = new Bitmap(stFrameChannel0Info.nWidth, stFrameChannel0Info.nHeight, stFrameChannel0Info.nWidth, PixelFormat.Format8bppIndexed, pImage);
+                            ColorPalette cp = bmp.Palette;
+                            for (int i = 0; i < 256; i++)
+                            {
+                                cp.Entries[i] = Color.FromArgb(i, i, i);
+                            }
+                            bmp.Palette = cp;
+
+                            pictureBox1.Image = (Image)bmp;
+                        }
+                        else if (stFrameChannel0Info.enPixelType == MvCodeReader.MvCodeReaderGvspPixelType.PixelType_CodeReader_Gvsp_Jpeg)
+                        {
+                            GC.Collect();
+                            MemoryStream ms = new MemoryStream();
+                            ms.Write(m_BufForChannel0Driver, 0, (int)stFrameChannel0Info.nFrameLen);
+                            Image img = Image.FromStream(ms);
+                            pictureBox1.Image = img;
+                        }
+
+                        MvCodeReader.MV_CODEREADER_STRINGVALUE stBcrResult2 = (MvCodeReader.MV_CODEREADER_STRINGVALUE)Marshal.PtrToStructure(stFrameChannel0Info.pstCodeListEx, typeof(MvCodeReader.MV_CODEREADER_STRINGVALUE));
+                        //if(stBcrResult2.chCurValue.Length != 0)
+                        //{
+                        //    Console.WriteLine("============================data = " + stBcrResult2.chCurValue);
+                        //}
+
+                        MvCodeReader.MV_CODEREADER_RESULT_BCR_EX stBcrResult = (MvCodeReader.MV_CODEREADER_RESULT_BCR_EX)Marshal.PtrToStructure(stFrameChannel0Info.pstCodeListEx, typeof(MvCodeReader.MV_CODEREADER_RESULT_BCR_EX));
+
+                        if (stFrameChannel0Info.bIsGetCode)
+                        {
+                            if (decodeList.Count != 0)
+                            {
+                                decodeList.Clear();
+                                Console.WriteLine("Clear list code");
+                                listBox1.Items.Clear();
+                            }
+                            pCodeConer.Clear();
+                            pictureBox1.Refresh();
+                            IDMV_Data.Clear();
+
+                            string data = "";
+                            for (int i = 0; i < stBcrResult.nCodeNum; ++i)
+                            {
+                                // test decode data
+                                bool bIsValidUTF8 = IsTextUTF8(stBcrResult.stBcrInfoEx[i].chCode);
+                                int angle = stBcrResult.stBcrInfoEx[i].nAngle;
+
+
+                                if (bIsValidUTF8)
+                                {
+                                    string strCode = Encoding.UTF8.GetString(stBcrResult.stBcrInfoEx[i].chCode);
+                                    //Console.WriteLine("------------------------------------------------Get CodeNum: " + "CodeNum[" + i.ToString() + "], CodeString[" + strCode.Trim().TrimEnd('\0') + "]");
+
+                                }
+                                else
+                                {
+                                    string strCode = Encoding.GetEncoding("GB2312").GetString(stBcrResult.stBcrInfoEx[i].chCode);
+                                    //Console.WriteLine("------------------------------------------------Get CodeNum: " + "CodeNum[" + i.ToString() + "], CodeString[" + strCode.Trim().TrimEnd('\0') + "]");
+                                    data = strCode.Trim().TrimEnd('\0');
+                                    //decodeList.Add(data); 
+                                    //listBox1.Items.Add(data);
+                                }
+
+
+                                Console.WriteLine(data + $" angle: {angle}");
+
+                                stPointChannel0List = new System.Drawing.Point[4];
+                                Point2f[] tempPoint = new Point2f[4];
+                                for (int j = 0; j < 4; ++j)
+                                {
+                                    stPointChannel0List[j].X = (int)(stBcrResult.stBcrInfoEx[i].pt[j].x * (float)(pictureBox1.Size.Width) / stFrameChannel0Info.nWidth);
+                                    stPointChannel0List[j].Y = (int)(stBcrResult.stBcrInfoEx[i].pt[j].y * (float)(pictureBox1.Size.Height) / stFrameChannel0Info.nHeight);
+                                    //PointsROI.Add(ConvertPointToPointF(stPointChannel0List[j]));
+                                    tempPoint[j] = new Point2f(stBcrResult.stBcrInfoEx[i].pt[j].x, stBcrResult.stBcrInfoEx[i].pt[j].y);
+                                    //pCodeConer[j] = new Point2f((float)stBcrResult.stBcrInfoEx[i].pt[j].x * (pictureBox1.Size.Width / (float)stFrameChannel0Info.nWidth),
+                                    //                (float)stBcrResult.stBcrInfoEx[i].pt[j].y * (pictureBox1.Size.Height / (float)stFrameChannel0Info.nHeight));
+                                }
+                                pCodeConer.Add(tempPoint);
+                                code_data code = new code_data(data, tempPoint, false, 0, i);
+                                IDMV_Data.Add(code);
+                                //graBox1.DrawPolygon(penChannel0, stPointChannel0List);
+
+                                // test draw roi
+                                //stPointChannel0ListRoi = new System.Drawing.Point[4];
+
+                                //stPointChannel0ListRoi[0].X = stPointChannel0List[0].X - 10;
+                                //stPointChannel0ListRoi[0].Y = stPointChannel0List[0].Y + 10;
+
+                                //stPointChannel0ListRoi[1].X = stPointChannel0List[1].X - 10;
+                                //stPointChannel0ListRoi[1].Y = stPointChannel0List[1].Y + 10;
+
+                                //stPointChannel0ListRoi[2].X = stPointChannel0List[2].X + 10;
+                                //stPointChannel0ListRoi[2].Y = stPointChannel0List[2].Y + 10;
+
+                                //stPointChannel0ListRoi[3].X = stPointChannel0List[3].X + 10;
+                                //stPointChannel0ListRoi[3].Y = stPointChannel0List[3].Y - 10;
+
+                                //for (int j = 0; j < 4; ++j)
+                                //{
+                                //    PointsROI.Add(ConvertPointToPointF(stPointChannel0List[j]));
+
+                                //}
+
+                                //test enlarge
+                                //List<PointF> enlarged_points = GetEnlargedPolygon(PointsROI, 10f);
+
+                                //graBox1.DrawPolygon(penChannelRoi, enlarged_points.ToArray());
+
+                                //PointsROI.Clear();
+                                //dataGridViewShowData.BeginInvoke(new Action(() =>
+                                //{
+                                //    DataGridViewRow row = new DataGridViewRow();
+                                //    row.CreateCells(dataGridViewShowData);
+                                //    row.Cells[0].Value = i + 1;
+                                //    row.Cells[1].Value = IDMV_Data[i].getDecode();
+                                //    dataGridViewShowData.Rows.Add(row);
+
+                                //}));
+                            }
+
+                            dataGridViewShowData.Rows.Clear();
+                            int iNo = 1;
+                            foreach (var codeData in IDMV_Data)
+                            {
+                                try
+                                {
+                                    dataGridViewShowData.BeginInvoke(new Action(() =>
+                                    {
+                                        DataGridViewRow row = new DataGridViewRow();
+                                        row.CreateCells(dataGridViewShowData);
+                                        row.Cells[0].Value = iNo;
+                                        row.Cells[1].Value = codeData.Decoded_string;
+                                        dataGridViewShowData.Rows.Add(row);
+                                        iNo++;
+                                    }));
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine(ex.Message);
+                                }
+                            }
+                            picBoxToMat();
+                            fillerImg();
+                            contourFind();
+                            DrawNewRoi(); 
+                            DrawCodeConder(matImg);
+                            SortRoi();
+                            //picBoxToMat();
+                            //drawRoi();
+                            //matchingCode();
+                        }
+
+
+                        //MvCodeReader.MV_CODEREADER_WAYBILL_LIST stWayList = (MvCodeReader.MV_CODEREADER_WAYBILL_LIST)Marshal.PtrToStructure(stFrameChannel0Info.pstWaybillList, typeof(MvCodeReader.MV_CODEREADER_WAYBILL_LIST));
+
+                        //for (int i = 0; i < stWayList.nWaybillNum; ++i)
+                        //{
+                        //    float fWayX = (float)(stWayList.stWaybillInfo[i].fCenterX * (float)(pictureBox1.Size.Width) / stFrameChannel0Info.nWidth);
+                        //    float fWayY = (float)(stWayList.stWaybillInfo[i].fCenterY * (float)(pictureBox1.Size.Height) / stFrameChannel0Info.nHeight);
+                        //    float fWayW = (float)(stWayList.stWaybillInfo[i].fWidth * (float)(pictureBox1.Size.Width) / stFrameChannel0Info.nWidth);
+                        //    float fWayH = (float)(stWayList.stWaybillInfo[i].fHeight * (float)(pictureBox1.Size.Height) / stFrameChannel0Info.nHeight);
+
+                        //    WayShapePath.Reset();
+                        //    WayShapePath.AddRectangle(new RectangleF(fWayX - fWayW / 2, fWayY - fWayH / 2, fWayW, fWayH));
+
+                        //    stRotateWay.Reset();
+                        //    PointF stCenPoint = new PointF(fWayX, fWayY);
+                        //    stRotateWay.RotateAt(stWayList.stWaybillInfo[i].fAngle, stCenPoint);
+                        //    WayShapePath.Transform(stRotateWay);
+                        //    graBox1.DrawPath(penWay, WayShapePath);
+                        //}
+
+                        //MvCodeReader.MV_CODEREADER_OCR_INFO_LIST stOcrInfo = (MvCodeReader.MV_CODEREADER_OCR_INFO_LIST)Marshal.PtrToStructure(stFrameChannel0Info.UnparsedOcrList.pstOcrList, typeof(MvCodeReader.MV_CODEREADER_OCR_INFO_LIST));
+
+                        //for (int i = 0; i < stOcrInfo.nOCRAllNum; ++i)
+                        //{
+                        //    float fOcrInfoX = (float)(stOcrInfo.stOcrRowInfo[i].nOcrRowCenterX * (float)(pictureBox1.Size.Width) / stFrameChannel0Info.nWidth);
+                        //    float fOcrInfoY = (float)(stOcrInfo.stOcrRowInfo[i].nOcrRowCenterY * (float)(pictureBox1.Size.Height) / stFrameChannel0Info.nHeight);
+                        //    float fOcrInfoW = (float)(stOcrInfo.stOcrRowInfo[i].nOcrRowWidth * (float)(pictureBox1.Size.Width) / stFrameChannel0Info.nWidth);
+                        //    float fOcrInfoH = (float)(stOcrInfo.stOcrRowInfo[i].nOcrRowHeight * (float)(pictureBox1.Size.Height) / stFrameChannel0Info.nHeight);
+
+                        //    OcrShapePath_0.Reset();
+                        //    OcrShapePath_0.AddRectangle(new RectangleF(fOcrInfoX - fOcrInfoW / 2, fOcrInfoY - fOcrInfoH / 2, fOcrInfoW, fOcrInfoH));
+
+                        //    stRotateM_0.Reset();
+                        //    PointF stCenPoint = new PointF(fOcrInfoX, fOcrInfoY);
+                        //    stRotateM_0.RotateAt(stOcrInfo.stOcrRowInfo[i].fOcrRowAngle, stCenPoint);
+                        //    OcrShapePath_0.Transform(stRotateM_0);
+                        //    graBox1.DrawPath(penOCR, OcrShapePath_0);
+
+                        //}
+                    }
+                    else
+                    {
+                        if (MvCodeReader.MV_CODEREADER_E_PARAMETER == nRet)
+                        {
+                            break;
+                        }
+
+                        if (bnTriggerMode.Checked)
+                        {
+                            Thread.Sleep(5);
+                        }
                         continue;
                     }
-
-                    // 通道0绘制图像
-                    Marshal.Copy(pData, m_BufForChannel0Driver, 0, (int)stFrameChannel0Info.nFrameLen);
-                    if (stFrameChannel0Info.enPixelType == MvCodeReader.MvCodeReaderGvspPixelType.PixelType_CodeReader_Gvsp_Mono8)
-                    {
-                        IntPtr pImage = Marshal.UnsafeAddrOfPinnedArrayElement(m_BufForChannel0Driver, 0);
-                        bmp = new Bitmap(stFrameChannel0Info.nWidth, stFrameChannel0Info.nHeight, stFrameChannel0Info.nWidth, PixelFormat.Format8bppIndexed, pImage);
-                        ColorPalette cp = bmp.Palette;
-                        for (int i = 0; i < 256; i++)
-                        {
-                            cp.Entries[i] = Color.FromArgb(i, i, i);
-                        }
-                        bmp.Palette = cp;
-
-                        pictureBox1.Image = (Image)bmp;
-                    }
-                    else if (stFrameChannel0Info.enPixelType == MvCodeReader.MvCodeReaderGvspPixelType.PixelType_CodeReader_Gvsp_Jpeg)
-                    {
-                        GC.Collect();
-                        MemoryStream ms = new MemoryStream();
-                        ms.Write(m_BufForChannel0Driver, 0, (int)stFrameChannel0Info.nFrameLen);
-                        Image img = Image.FromStream(ms);
-                        pictureBox1.Image = img;
-                    }
-
-                    MvCodeReader.MV_CODEREADER_STRINGVALUE stBcrResult2 = (MvCodeReader.MV_CODEREADER_STRINGVALUE)Marshal.PtrToStructure(stFrameChannel0Info.pstCodeListEx, typeof(MvCodeReader.MV_CODEREADER_STRINGVALUE));
-                    //if(stBcrResult2.chCurValue.Length != 0)
-                    //{
-                    //    Console.WriteLine("============================data = " + stBcrResult2.chCurValue);
-                    //}
-
-                    MvCodeReader.MV_CODEREADER_RESULT_BCR_EX stBcrResult = (MvCodeReader.MV_CODEREADER_RESULT_BCR_EX)Marshal.PtrToStructure(stFrameChannel0Info.pstCodeListEx, typeof(MvCodeReader.MV_CODEREADER_RESULT_BCR_EX));
-
-                    if (stFrameChannel0Info.bIsGetCode)
-                    {
-                        if (decodeList.Count != 0)
-                        {
-                            decodeList.Clear();
-                            Console.WriteLine("Clear list code");
-                            listBox1.Items.Clear();
-                        }
-                        pCodeConer.Clear();
-                        pictureBox1.Refresh();
-                        IDMV_Data.Clear();
-
-                        string data = "";
-                        for (int i = 0; i < stBcrResult.nCodeNum; ++i)
-                        {
-                            // test decode data
-                            bool bIsValidUTF8 = IsTextUTF8(stBcrResult.stBcrInfoEx[i].chCode);
-                            int angle = stBcrResult.stBcrInfoEx[i].nAngle;
-                            
-
-                            if (bIsValidUTF8)
-                            {
-                                string strCode = Encoding.UTF8.GetString(stBcrResult.stBcrInfoEx[i].chCode);
-                                Console.WriteLine("------------------------------------------------Get CodeNum: " + "CodeNum[" + i.ToString() + "], CodeString[" + strCode.Trim().TrimEnd('\0') + "]");
-
-                            }
-                            else
-                            {
-                                string strCode = Encoding.GetEncoding("GB2312").GetString(stBcrResult.stBcrInfoEx[i].chCode);
-                                Console.WriteLine("------------------------------------------------Get CodeNum: " + "CodeNum[" + i.ToString() + "], CodeString[" + strCode.Trim().TrimEnd('\0') + "]");
-                                data = strCode.Trim().TrimEnd('\0');
-                                //decodeList.Add(data); 
-                                //listBox1.Items.Add(data);
-                            }
-
-
-                            Console.WriteLine(data + $" angle: {angle}");
-
-                            stPointChannel0List = new System.Drawing.Point[4];
-                            Point2f[] tempPoint = new Point2f[4];
-                            for (int j = 0; j < 4; ++j)
-                            {
-                                stPointChannel0List[j].X = (int)(stBcrResult.stBcrInfoEx[i].pt[j].x * (float)(pictureBox1.Size.Width) / stFrameChannel0Info.nWidth);
-                                stPointChannel0List[j].Y = (int)(stBcrResult.stBcrInfoEx[i].pt[j].y * (float)(pictureBox1.Size.Height) / stFrameChannel0Info.nHeight);
-                                //PointsROI.Add(ConvertPointToPointF(stPointChannel0List[j]));
-                                tempPoint[j] = new Point2f(stBcrResult.stBcrInfoEx[i].pt[j].x, stBcrResult.stBcrInfoEx[i].pt[j].y);
-                                //pCodeConer[j] = new Point2f((float)stBcrResult.stBcrInfoEx[i].pt[j].x * (pictureBox1.Size.Width / (float)stFrameChannel0Info.nWidth),
-                                //                (float)stBcrResult.stBcrInfoEx[i].pt[j].y * (pictureBox1.Size.Height / (float)stFrameChannel0Info.nHeight));
-                            }
-                            pCodeConer.Add(tempPoint);
-                            code_data code = new code_data(data, tempPoint, false, 0, i);
-                            IDMV_Data.Add(code);
-                            graBox1.DrawPolygon(penChannel0, stPointChannel0List);
-
-                            // test draw roi
-                            //stPointChannel0ListRoi = new System.Drawing.Point[4];
-
-                            //stPointChannel0ListRoi[0].X = stPointChannel0List[0].X - 10;
-                            //stPointChannel0ListRoi[0].Y = stPointChannel0List[0].Y + 10;
-
-                            //stPointChannel0ListRoi[1].X = stPointChannel0List[1].X - 10;
-                            //stPointChannel0ListRoi[1].Y = stPointChannel0List[1].Y + 10;
-
-                            //stPointChannel0ListRoi[2].X = stPointChannel0List[2].X + 10;
-                            //stPointChannel0ListRoi[2].Y = stPointChannel0List[2].Y + 10;
-
-                            //stPointChannel0ListRoi[3].X = stPointChannel0List[3].X + 10;
-                            //stPointChannel0ListRoi[3].Y = stPointChannel0List[3].Y - 10;
-
-                            //for (int j = 0; j < 4; ++j)
-                            //{
-                            //    PointsROI.Add(ConvertPointToPointF(stPointChannel0List[j]));
-
-                            //}
-
-                            //test enlarge
-                            //List<PointF> enlarged_points = GetEnlargedPolygon(PointsROI, 10f);
-
-                            //graBox1.DrawPolygon(penChannelRoi, enlarged_points.ToArray());
-
-                            //PointsROI.Clear();
-                            //dataGridViewShowData.BeginInvoke(new Action(() =>
-                            //{
-                            //    DataGridViewRow row = new DataGridViewRow();
-                            //    row.CreateCells(dataGridViewShowData);
-                            //    row.Cells[0].Value = i + 1;
-                            //    row.Cells[1].Value = IDMV_Data[i].getDecode();
-                            //    dataGridViewShowData.Rows.Add(row);
-
-                            //}));
-                        }
-
-                        dataGridViewShowData.Rows.Clear();
-                        int iNo = 1;
-                        foreach (var codeData in IDMV_Data)
-                        {
-                            dataGridViewShowData.BeginInvoke(new Action(() =>
-                            {
-                                DataGridViewRow row = new DataGridViewRow();
-                                row.CreateCells(dataGridViewShowData);
-                                row.Cells[0].Value = iNo;
-                                row.Cells[1].Value = codeData.Decoded_string;
-                                dataGridViewShowData.Rows.Add(row);
-                                iNo++;
-                            }));
-                        }
-                        picBoxToMat();
-                        fillerImg();
-                        contourFind();
-
-                        drawRoi();
-                        matchingCode();
-                    }
-
-
-                    MvCodeReader.MV_CODEREADER_WAYBILL_LIST stWayList = (MvCodeReader.MV_CODEREADER_WAYBILL_LIST)Marshal.PtrToStructure(stFrameChannel0Info.pstWaybillList, typeof(MvCodeReader.MV_CODEREADER_WAYBILL_LIST));
-
-                    for (int i = 0; i < stWayList.nWaybillNum; ++i)
-                    {
-                        float fWayX = (float)(stWayList.stWaybillInfo[i].fCenterX * (float)(pictureBox1.Size.Width) / stFrameChannel0Info.nWidth);
-                        float fWayY = (float)(stWayList.stWaybillInfo[i].fCenterY * (float)(pictureBox1.Size.Height) / stFrameChannel0Info.nHeight);
-                        float fWayW = (float)(stWayList.stWaybillInfo[i].fWidth * (float)(pictureBox1.Size.Width) / stFrameChannel0Info.nWidth);
-                        float fWayH = (float)(stWayList.stWaybillInfo[i].fHeight * (float)(pictureBox1.Size.Height) / stFrameChannel0Info.nHeight);
-
-                        WayShapePath.Reset();
-                        WayShapePath.AddRectangle(new RectangleF(fWayX - fWayW / 2, fWayY - fWayH / 2, fWayW, fWayH));
-
-                        stRotateWay.Reset();
-                        PointF stCenPoint = new PointF(fWayX, fWayY);
-                        stRotateWay.RotateAt(stWayList.stWaybillInfo[i].fAngle, stCenPoint);
-                        WayShapePath.Transform(stRotateWay);
-                        graBox1.DrawPath(penWay, WayShapePath);
-                    }
-
-                    MvCodeReader.MV_CODEREADER_OCR_INFO_LIST stOcrInfo = (MvCodeReader.MV_CODEREADER_OCR_INFO_LIST)Marshal.PtrToStructure(stFrameChannel0Info.UnparsedOcrList.pstOcrList, typeof(MvCodeReader.MV_CODEREADER_OCR_INFO_LIST));
-
-                    for (int i = 0; i < stOcrInfo.nOCRAllNum; ++i)
-                    {
-                        float fOcrInfoX = (float)(stOcrInfo.stOcrRowInfo[i].nOcrRowCenterX * (float)(pictureBox1.Size.Width) / stFrameChannel0Info.nWidth);
-                        float fOcrInfoY = (float)(stOcrInfo.stOcrRowInfo[i].nOcrRowCenterY * (float)(pictureBox1.Size.Height) / stFrameChannel0Info.nHeight);
-                        float fOcrInfoW = (float)(stOcrInfo.stOcrRowInfo[i].nOcrRowWidth * (float)(pictureBox1.Size.Width) / stFrameChannel0Info.nWidth);
-                        float fOcrInfoH = (float)(stOcrInfo.stOcrRowInfo[i].nOcrRowHeight * (float)(pictureBox1.Size.Height) / stFrameChannel0Info.nHeight);
-
-                        OcrShapePath_0.Reset();
-                        OcrShapePath_0.AddRectangle(new RectangleF(fOcrInfoX - fOcrInfoW / 2, fOcrInfoY - fOcrInfoH / 2, fOcrInfoW, fOcrInfoH));
-
-                        stRotateM_0.Reset();
-                        PointF stCenPoint = new PointF(fOcrInfoX, fOcrInfoY);
-                        stRotateM_0.RotateAt(stOcrInfo.stOcrRowInfo[i].fOcrRowAngle, stCenPoint);
-                        OcrShapePath_0.Transform(stRotateM_0);
-                        graBox1.DrawPath(penOCR, OcrShapePath_0);
-
-                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    if (MvCodeReader.MV_CODEREADER_E_PARAMETER == nRet)
-                    {
-                        break;
-                    }
-
-                    if (bnTriggerMode.Checked)
-                    {
-                        Thread.Sleep(5);
-                    }
-                    continue;
+                    Console.WriteLine(ex.Message);
                 }
             }
         }
@@ -1283,20 +1302,28 @@ namespace MSC_BasicDemo
 
         public void picBoxToMat()
         {
-            Bitmap bitmap = null;
-            if (pictureBox1.Image != null)
+            try
             {
-                pictureBoxCV.Image = pictureBox1.Image;
-                bitmap = (Bitmap)pictureBox1.Image;
+                Bitmap bitmap = null;
+                if (pictureBox1.Image != null)
+                {
+                    pictureBoxCV.Image = pictureBox1.Image;
+                    bitmap = (Bitmap)pictureBox1.Image;
+
+                }
+                else
+                {
+                    bitmap = (Bitmap)pictureBoxCV.Image;
+                }
+                matImg = new Mat(5440, 3648, MatType.CV_8UC1);
+                matImg = BitmapConverter.ToMat(bitmap);
+                Cv2.CvtColor(matImg, matImg, ColorConversionCodes.BGRA2GRAY);
 
             }
-            else
+            catch (Exception ex)
             {
-                bitmap = (Bitmap)pictureBoxCV.Image;
+                MessageBox.Show(ex.Message);
             }
-            matImg = new Mat(5440, 3648, MatType.CV_8UC1);
-            matImg = BitmapConverter.ToMat(bitmap);
-            Cv2.CvtColor(matImg, matImg, ColorConversionCodes.BGRA2GRAY);
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -1719,7 +1746,7 @@ namespace MSC_BasicDemo
         {
             IDMV_Data = IDMV_Data.OrderBy(data => data.Code_coner[0].X).ThenBy(data => data.Code_coner[0].Y).ToList();
             int i = 1;
-            foreach(var codeData in IDMV_Data)
+            foreach (var codeData in IDMV_Data)
             {
                 codeData.Cindex = i;
                 i++;
@@ -1728,10 +1755,10 @@ namespace MSC_BasicDemo
 
         public void SortRoi()
         {
-            contoursToKeep = contoursToKeep.OrderBy(data => data[0].X).ThenBy(data => data[0].Y).ToList() ;
-            for(int i = 0; i < contoursToKeep.Count; i++)
+            contoursToKeep = contoursToKeep.OrderBy(data => data[0].X).ThenBy(data => data[0].Y).ToList();
+            for (int i = 0; i < contoursToKeep.Count; i++)
             {
-                Cv2.PutText(matImg, (i + 1).ToString(), new OpenCvSharp.Point(contoursToKeep[i][0].X, contoursToKeep[i][0].Y), fontFace, fontScale, color, thickness, lineType) ;
+                Cv2.PutText(matImg, (i + 1).ToString(), new OpenCvSharp.Point(contoursToKeep[i][0].X, contoursToKeep[i][0].Y), fontFace, fontScale, color, thickness, lineType);
             }
             pictureBox1.Image = matImg.ToBitmap();
         }
@@ -1758,25 +1785,59 @@ namespace MSC_BasicDemo
             {
                 RotatedRect rotatedRect = Cv2.MinAreaRect(contour);
                 Point2f[] vertices = Cv2.BoxPoints(rotatedRect);
+                Console.WriteLine($"Check rect {vertices[0].X}:{vertices[0].Y}");
                 OpenCvSharp.Point[] boxVertices = new OpenCvSharp.Point[4];
                 for (int i = 0; i < 4; i++)
                 {
                     boxVertices[i] = new OpenCvSharp.Point((int)vertices[i].X, (int)vertices[i].Y);
                 }
                 bool bHasCode = false;
-                foreach(var code in IDMV_Data)
+                foreach (var code in IDMV_Data)
                 {
                     Point2f centerP = FindCenterPoint(code.Code_coner);
-                    bool bHasCode2 = isInside(centerP, contour);
+                    bHasCode = isInside(centerP, contour);
+                    if (bHasCode)
+                    {
+                        Console.WriteLine($"Code center = {centerP.X}:{centerP.Y} -> inside {bHasCode}");
+                        //tempImg.Polylines(new[] { boxVertices }, true, Scalar.Green, 5);
+                        break;
+                    }
+                    else
+                    {
+                        //tempImg.Polylines(new[] { boxVertices }, true, Scalar.Red, 5);
+                        //Console.WriteLine($"Nothing inside");
+                    }
+                    //Console.WriteLine("end");
                 }
-                tempImg.Polylines(new[] { boxVertices }, true, bHasCode? Scalar.Green : Scalar.Red, 5);
+                tempImg.Polylines(new[] { boxVertices }, true, bHasCode ? Scalar.Green : Scalar.Red, 5);
 
                 //for (int i = 0; i < contours.Length; i++)
                 //{
                 //    Cv2.DrawContours(result, contours, i, Scalar.White, thickness: 5);
                 //}
             }
-            pictureBox1.Image = tempImg.ToBitmap() ;
+            pictureBox1.Image = tempImg.ToBitmap();
+            matImg = tempImg;
+        }
+
+        public Mat getPicboxIMG(PictureBox pictureBox)
+        {
+            Mat tempImg = new Mat(5440, 3648, MatType.CV_8UC1);
+            if (pictureBox1.Image != null)
+            {
+                //Bitmap bitmapTemp = new Bitmap(5440, 3648);
+                //pictureBox1.DrawToBitmap(bitmapTemp, pictureBox1.ClientRectangle);
+                //Mat tempImg = new Mat(5440, 3648, MatType.CV_8UC1);
+                Bitmap bitmapTemp = (Bitmap)pictureBox1.Image;
+                tempImg = BitmapConverter.ToMat(bitmapTemp);
+            }
+            else
+            {
+                //Mat tempImg = new Mat(5440, 3648, MatType.CV_8UC1);
+                Bitmap bitmapTemp = (Bitmap)pictureBoxCV.Image;
+                tempImg = BitmapConverter.ToMat(bitmapTemp);
+            }
+            return tempImg;
         }
     }
 }
